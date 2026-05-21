@@ -26,6 +26,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
 
     <script>
         // Safely extending Tailwind configuration
@@ -770,10 +772,20 @@
                     throw new Error("Configuração Firebase não encontrada.");
                 }
 
-                // Initialize Firebase App
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(config);
-                }
+            // Initialize Firebase App
+            let firebaseApp;
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(config);
+            
+            } else {
+                firebaseApp = firebase.app(); // Get the existing app instance
+            }
+
+            // Initialize Analytics
+            if (config.measurementId) { // Only initialize if measurementId is present
+                firebase.analytics(firebaseApp);
+            }
+
                 
                 db = firebase.firestore();
                 auth = firebase.auth();
