@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servnac - Controle de Remanejos e Substituições</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS Play CDN (Loaded first to avoid reference errors) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for reports and dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS (XLSX) for high-fidelity Excel parsing/generating -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // Safely extending Tailwind configuration after script load
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f2fbf7',
+                            100: '#e2f7ed',
+                            200: '#c5eedb',
+                            300: '#95e0be',
+                            400: '#5ecb9b',
+                            500: '#34b27d',
+                            600: '#239364',
+                            700: '#1b4332', /* Forest Green Primary */
+                            800: '#112f24', /* Dark Sidebar Green */
+                            900: '#081c15', /* Deepest Green */
+                        },
+                        accent: {
+                            DEFAULT: '#f1f5f9', /* Premium light slate gray */
+                            hover: '#e2e8f0',   /* Slate hover gray */
+                            dark: '#64748b'     /* Dark slate gray */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar style */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Print layout adjustments for high fidelity A4 PDF reports */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+                color: black !important;
+                font-size: 12px;
+            }
+            .print-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            table {
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col md:flex-row text-slate-800 antialiased overflow-hidden">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="no-print w-full md:w-64 bg-brand-800 text-white flex-shrink-0 flex flex-col justify-between shadow-2xl z-20">
+        <div>
+            <!-- Sidebar Header -->
+            <div class="p-6 border-b border-brand-700 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-brand-700 font-bold text-xl shadow-md">
+                        <i class="fa-solid fa-users-gear text-brand-700"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base tracking-wide uppercase">SERVNAC</h1>
+                        <p class="text-[10px] text-brand-300 uppercase tracking-widest font-semibold">Substituições</p>
+                    </div>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav id="sidebar-nav" class="hidden md:block p-4 space-y-1">
+                <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-brand-700 text-white shadow-inner">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>Painel de Controle</span>
+                </button>
+                <button onclick="switchTab('tab-novo-remanejo')" id="btn-tab-novo-remanejo" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                    <i class="fa-solid fa-arrows-rotate w-5 text-center"></i>
+                    <span>Novo Remanejo</span>
+                </button>
+                <button onclick="switchTab('tab-relatorios')" id="btn-tab-relatorios" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                    <i class="fa-solid fa-file-invoice w-5 text-center"></i>
+                    <span>Relatórios & Filtros</span>
+                </button>
+                <button onclick="switchTab('tab-colaboradores')" id="btn-tab-colaboradores" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                    <i class="fa-solid fa-user-shield w-5 text-center"></i>
+                    <span>Colaboradores</span>
+                </button>
+                <button onclick="switchTab('tab-postos')" id="btn-tab-postos" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                    <i class="fa-solid fa-building-user w-5 text-center"></i>
+                    <span>Postos de Serviço</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Connection / Footer status info -->
+        <div class="hidden md:block p-4 border-t border-brand-700 bg-brand-900 bg-opacity-40">
+            <div class="flex items-center space-x-3 text-xs text-brand-300">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Banco de Dados Ativo</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Servnac © 2026</p>
+        </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- HEADER BAR (Desktop & Mobile header placeholder) -->
+        <header class="no-print bg-white border-b border-slate-200 h-16 flex-shrink-0 flex items-center justify-between px-6 shadow-sm">
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-600 focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h2 id="page-title" class="text-lg font-bold text-slate-800">Painel de Controle</h2>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Quick Date indicator -->
+                <span id="current-date-badge" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg shadow-inner">
+                    <i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> Carregando...
+                </span>
+                <span class="h-6 w-px bg-slate-200"></span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow">
+                        OP
+                    </div>
+                    <span class="text-sm font-semibold text-slate-700 hidden sm:inline-block">Operador</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEWPORT CONTENT AREA -->
+        <div class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50">
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Counter Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Substituições Hoje</p>
+                            <h3 id="stat-today-remanejos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                            <p class="text-xs text-emerald-600 font-medium mt-1">Registradas hoje</p>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-arrows-spin"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total de Colaboradores</p>
+                            <h3 id="stat-total-colaboradores" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                            <p class="text-xs text-slate-400 mt-1">Registrados no sistema</p>
+                        </div>
+                        <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Postos Ativos</p>
+                            <h3 id="stat-total-postos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                            <p class="text-xs text-slate-400 mt-1">Postos sob monitoramento</p>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-100/40 text-brand-700 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-building-shield"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Substituições</p>
+                            <h3 id="stat-total-substituicoes" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                            <p class="text-xs text-slate-400 mt-1">Histórico geral acumulado</p>
+                        </div>
+                        <div class="w-12 h-12 bg-zinc-100 text-zinc-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphs and Activities Area -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Graph widget -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Motivos das Ocorrências</h4>
+                            <p class="text-xs text-slate-400 mb-6">Gráfico dinâmico das justificativas mais frequentes para as trocas</p>
+                        </div>
+                        <div class="relative h-64 flex items-center justify-center">
+                            <canvas id="motivesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Actions Panel -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[380px]">
+                        <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Últimos Remanejos</h4>
+                        <p class="text-xs text-slate-400 mb-4">Atualizações efetuadas recentemente</p>
+                        
+                        <div id="dashboard-recent-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                            <!-- Injected dynamically -->
+                            <p class="text-slate-400 text-xs text-center py-8">Nenhum remanejo registrado hoje.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: NOVO REMANEJO -->
+            <section id="tab-novo-remanejo" class="tab-content hidden space-y-6">
+                <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden">
+                    <div class="bg-gradient-to-r from-brand-800 to-brand-700 px-6 py-4 text-white">
+                        <h3 class="font-bold text-base tracking-wide uppercase">Lançar Nova Substituição / Remanejo</h3>
+                        <p class="text-xs text-brand-200">Efetue a escala de cobertura para manter a operação em andamento</p>
+                    </div>
+
+                    <form id="remanejo-form" onsubmit="handleCreateRemanejo(event)" class="p-6 space-y-6">
+                        <!-- Posto de Serviço selection -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">1. Posto de Serviço Onde Ocorrerá a Troca *</label>
+                            <select id="remanejo-posto" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                <option value="">Selecione o posto...</option>
+                            </select>
+                        </div>
+
+                        <!-- Side by side Employees -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Outgoing Colaborador -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                                    <i class="fa-solid fa-user-minus text-red-500 mr-1"></i> Colaborador Cedente (Saindo) *
+                                </label>
+                                <select id="remanejo-saindo" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="">Selecione quem está saindo...</option>
+                                </select>
+                                <p class="text-[11px] text-slate-400 mt-1">Profissional titular da escala que necessita ausentar-se.</p>
+                            </div>
+
+                            <!-- Incoming Colaborador -->
+                            <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                                    <i class="fa-solid fa-user-plus text-brand-600 mr-1"></i> Colaborador Substituto (Entrando) *
+                                </label>
+                                <select id="remanejo-entrando" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="">Selecione o substituto...</option>
+                                </select>
+                                <p class="text-[11px] text-slate-400 mt-1">Profissional responsável por assumir o posto de cobertura.</p>
+                            </div>
+                        </div>
+
+                        <!-- Date and Justifications -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Data do Remanejo *</label>
+                                <input type="date" id="remanejo-data" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Turno de Serviço *</label>
+                                <select id="remanejo-turno" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                    <option value="Diurno (12x36)">Diurno (12x36)</option>
+                                    <option value="Noturno (12x36)">Noturno (12x36)</option>
+                                    <option value="Diário Administrativo">Diário Administrativo</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Motivo Principal *</label>
+                                <select id="remanejo-motivo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                    <option value="Falta">Falta Injustificada</option>
+                                    <option value="Atestado">Atestado Médico</option>
+                                    <option value="Férias">Férias</option>
+                                    <option value="Folga">Folga Escala</option>
+                                    <option value="Licença">Licença / Afastamento</option>
+                                    <option value="Reciclagem">Treinamento / Reciclagem</option>
+                                    <option value="Outro">Outros Motivos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Detailed details -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Observações Adicionais / Histórico</label>
+                            <textarea id="remanejo-obs" rows="3" placeholder="Insira detalhes adicionais sobre o remanejamento ou autorizações especiais..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white"></textarea>
+                        </div>
+
+                        <!-- Action footer buttons -->
+                        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                            <button type="button" onclick="resetForm('remanejo-form')" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+                                Limpar
+                            </button>
+                            <button type="submit" class="px-6 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Salvar Remanejo</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 3: RELATÓRIOS & EXPORTAÇÃO -->
+            <section id="tab-relatorios" class="tab-content hidden space-y-6">
+                <!-- Advanced Query Engine Card -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm no-print">
+                    <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-4">Mapeador de Filtros de Relatórios</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Filtro de Período</label>
+                            <select id="report-period" onchange="handlePeriodPreset()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                <option value="today">Diário (Hoje)</option>
+                                <option value="week">Semanal (7 Dias)</option>
+                                <option value="month" selected>Mensal (Este Mês)</option>
+                                <option value="year">Anual (Este Ano)</option>
+                                <option value="custom">Período Customizado</option>
+                            </select>
+                        </div>
+                        
+                        <div id="custom-dates-range" class="hidden sm:col-span-2 grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">De</label>
+                                <input type="date" id="report-start" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Até</label>
+                                <input type="date" id="report-end" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Posto de Serviço</label>
+                            <select id="report-posto" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="all">Todos os postos</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5 font-sans">Colaborador (Pesquisa)</label>
+                            <input type="text" id="report-colab" placeholder="Ex: João, Maria..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-2 mt-4 pt-4 border-t border-slate-100">
+                        <button onclick="applyReportFilters()" class="px-4 py-2 text-xs font-bold rounded-lg bg-brand-700 hover:bg-brand-800 text-white transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Gerar Relatório</span>
+                        </button>
+                        <button onclick="printFormattedReport()" class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Imprimir PDF</span>
+                        </button>
+                        <button onclick="exportReportToExcel()" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Exportar Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable Report Output Content -->
+                <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm print-container">
+                    <!-- Letter Header (visible on print) -->
+                    <div class="border-b-2 border-brand-700 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                        <div>
+                            <h2 class="text-xl font-extrabold text-slate-800 tracking-wide">RELATÓRIO DE REMANEJOS & SUBSTITUIÇÕES</h2>
+                            <p class="text-xs text-brand-700 font-bold uppercase mt-0.5">Grupo Servnac Segurança Eletrônica e Vigilância</p>
+                            <p class="text-[11px] text-slate-400 font-sans mt-0.5" id="report-meta-text">Filtro ativo: Todos os registros</p>
+                        </div>
+                        <div class="text-right mt-3 sm:mt-0">
+                            <p class="text-[11px] text-slate-600 font-semibold uppercase">Controle Operacional</p>
+                            <p class="text-[10px] text-slate-400" id="report-print-date">Emitido em: --/--/----</p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Report Summary Box -->
+                    <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Total Selecionado</span>
+                            <span id="report-summary-total" class="text-lg font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Postos Atendidos</span>
+                            <span id="report-summary-postos" class="text-lg font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Motivo Frequente</span>
+                            <span id="report-summary-motivo" class="text-xs font-bold text-emerald-800 uppercase leading-5">N/A</span>
+                        </div>
+                    </div>
+
+                    <!-- Report Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b border-slate-200 uppercase">
+                                    <th class="p-3">Data</th>
+                                    <th class="p-3">Posto de Serviço</th>
+                                    <th class="p-3">Cedente (Saindo)</th>
+                                    <th class="p-3">Substituto (Entrando)</th>
+                                    <th class="p-3">Motivo</th>
+                                    <th class="p-3">Escala/Turno</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                <!-- Dynamically populated -->
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-slate-400 font-sans">Use os filtros acima e clique em "Gerar Relatório" para ver os dados.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Standard Document Signature line (only displayed during prints) -->
+                    <div class="hidden print:block mt-16 pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 text-center">
+                        <div>
+                            <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
+                            <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Operador de Tráfego</span>
+                        </div>
+                        <div>
+                            <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
+                            <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Coordenador Operacional</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: COLABORADORES -->
+            <section id="tab-colaboradores" class="tab-content hidden space-y-6">
+                <!-- Grid: Form + XLS Importer -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Insert Form -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
+                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Colaborador</h3>
+                        <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo vigia / segurança</p>
+
+                        <form id="colab-form" onsubmit="handleCreateColab(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome Completo *</label>
+                                <input type="text" id="colab-nome" required placeholder="Ex: Roberto da Silva Sobrinho" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">CPF (Opcional)</label>
+                                <input type="text" id="colab-cpf" placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Função / Cargo *</label>
+                                <select id="colab-cargo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="Vigilante">Vigilante</option>
+                                    <option value="Vigilante Condutor">Vigilante Condutor</option>
+                                    <option value="Vigilante Armado">Vigilante Armado</option>
+                                    <option value="Porteiro">Porteiro</option>
+                                    <option value="Controlador de Acesso">Controlador de Acesso</option>
+                                    <option value="Fiscal de Piso">Fiscal de Piso</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1 font-sans">Matrícula (Opcional)</label>
+                                <input type="text" id="colab-matricula" placeholder="Ex: M1287" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs transition flex items-center justify-center space-x-1.5 shadow">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>Adicionar Colaborador</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- EXCEL MASSIVE IMPORTER -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Importação em Massa via Excel</h3>
+                            <p class="text-xs text-slate-400 mb-4">Lê e processa planilhas do Microsoft Excel (.xlsx, .xls) ou CSV instantaneamente</p>
+                        </div>
+
+                        <!-- Dropzone Area -->
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 hover:bg-emerald-50/10 p-8 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-150">
+                            <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-3 animate-bounce"></i>
+                            <h5 class="text-xs font-bold text-slate-700 uppercase mb-1">Arraste sua planilha Excel aqui</h5>
+                            <p class="text-[11px] text-slate-400 max-w-sm mb-4">A planilha deve conter colunas que representem Nome (Obrigatório), CPF, Cargo e Matrícula.</p>
+                            
+                            <label class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer">
+                                Procurar Arquivos
+                                <input type="file" id="excel-file-input" class="hidden" accept=".xlsx, .xls, .csv">
+                            </label>
+                        </div>
+
+                        <!-- Import Preview Area -->
+                        <div id="excel-preview-box" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-semibold text-slate-600" id="preview-count-label">Detectados: 0 colaboradores</span>
+                                <button onclick="confirmBulkImport()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition">
+                                    Confirmar Importação de Registros
+                                </button>
+                            </div>
+                            <div class="max-h-24 overflow-y-auto border border-slate-200 rounded-lg text-xs">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-50 sticky top-0 text-slate-500">
+                                        <tr class="border-b border-slate-200">
+                                            <th class="p-2">Nome</th>
+                                            <th class="p-2">Cargo</th>
+                                            <th class="p-2">Matrícula</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="excel-preview-tbody" class="text-[11px] divide-y divide-slate-100">
+                                        <!-- Preview dynamically rendered -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Colaboradores List Table -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                        <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Colaboradores Cadastrados</h4>
+                        <div class="w-full sm:w-64 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-colab-input" onkeyup="filterColabTable()" placeholder="Pesquisar por nome..." class="w-full pl-9 pr-4 py-1.5 bg-slate-100 border-none rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-500 text-xs font-bold border-b border-slate-200 uppercase">
+                                <tr>
+                                    <th class="p-3">Nome</th>
+                                    <th class="p-3">Cargo</th>
+                                    <th class="p-3">Matrícula</th>
+                                    <th class="p-3">CPF</th>
+                                    <th class="p-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="colab-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: POSTOS DE SERVIÇO -->
+            <section id="tab-postos" class="tab-content hidden space-y-6">
+                <!-- Main Grid block -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Insert Form -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
+                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Posto</h3>
+                        <p class="text-xs text-slate-400 mb-4">Adicione um novo cliente / local de atuação operacional</p>
+
+                        <form id="posto-form" onsubmit="handleCreatePosto(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome do Posto *</label>
+                                <input type="text" id="posto-nome" required placeholder="Ex: Hospital Central Servnac" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Endereço / Localização (Opcional)</label>
+                                <input type="text" id="posto-endereco" placeholder="Ex: Av. Santos Dumont, 1200" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Cidade / UF *</label>
+                                <input type="text" id="posto-cidade" required value="Fortaleza - CE" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs transition flex items-center justify-center space-x-1.5 shadow">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                                <span>Adicionar Posto</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Postos Database Listing -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                            <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Postos Ativos</h4>
+                            <div class="w-full sm:w-64 relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                <input type="text" id="search-posto-input" onkeyup="filterPostosTable()" placeholder="Pesquisar por posto..." class="w-full pl-9 pr-4 py-1.5 bg-slate-100 border-none rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-slate-500 text-xs font-bold border-b border-slate-200 uppercase">
+                                    <tr>
+                                        <th class="p-3">Posto de Serviço</th>
+                                        <th class="p-3">Localização</th>
+                                        <th class="p-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="postos-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- APP CORE CONTROLLER SCRIPT -->
+    <script>
+        /* ----------------------- STATE & DATA MANAGEMENT ----------------------- */
+        // Local in-memory store synchronized automatically with LocalStorage for flawless offline execution
+        let localColaboradores = [];
+        let localPostos = [];
+        let localRemanejos = [];
+        
+        let motivesChartInstance = null;
+        let parsedBulkEmployees = []; // Temporary holder for Excel imports
+
+        // Standard Default Data to boot up the system cleanly if no LocalStorage exists
+        const DEFAULT_POSTOS = [
+            { id: "p1", nome: "Centro Logístico Servnac - Sede", endereco: "Av. Santos Dumont, 1200", cidade: "Fortaleza - CE" },
+            { id: "p2", nome: "Hospital Geral de Fortaleza", endereco: "Rua Ávila Goulart, 900", cidade: "Fortaleza - CE" },
+            { id: "p3", nome: "Condomínio Corporate Green", endereco: "Av. Beira Mar, 450", cidade: "Fortaleza - CE" }
+        ];
+
+        const DEFAULT_COLABORADORES = [
+            { id: "c1", nome: "Francisco Alves Ribeiro", cpf: "111.222.333-44", cargo: "Vigilante", matricula: "V1092" },
+            { id: "c2", nome: "Antônio Carlos Magalhães", cpf: "222.333.444-55", cargo: "Vigilante Armado", matricula: "V1104" },
+            { id: "c3", nome: "Maria Edileusa Lima", cpf: "333.444.555-66", cargo: "Controlador de Acesso", matricula: "C3044" },
+            { id: "c4", nome: "José Welinton Santos", cpf: "444.555.666-77", cargo: "Vigilante Condutor", matricula: "V2091" },
+            { id: "c5", nome: "Raimundo Nonato Silva", cpf: "555.666.777-88", cargo: "Supervisor", matricula: "S4050" }
+        ];
+
+        const DEFAULT_REMANEJOS = [
+            { id: "r1", postoId: "p2", postoNome: "Hospital Geral de Fortaleza", saindoId: "c1", saindoNome: "Francisco Alves Ribeiro", entrandoId: "c3", entrandoNome: "Maria Edileusa Lima", data: "2026-05-20", turno: "Diurno (12x36)", motivo: "Atestado", obs: "Apresentou atestado de 2 dias por gripe." },
+            { id: "r2", postoId: "p3", postoNome: "Condomínio Corporate Green", saindoId: "c2", saindoNome: "Antônio Carlos Magalhães", entrandoId: "c4", entrandoNome: "José Welinton Santos", data: "2026-05-21", turno: "Noturno (12x36)", motivo: "Falta", obs: "Falta não justificada na troca da noite." }
+        ];
+
+        // Initialize state variables from storage
+        function initApp() {
+            // Load employees (colaboradores)
+            if (!localStorage.getItem('servnac_colab')) {
+                localStorage.setItem('servnac_colab', JSON.stringify(DEFAULT_COLABORADORES));
+            }
+            localColaboradores = JSON.parse(localStorage.getItem('servnac_colab'));
+
+            // Load posts (postos)
+            if (!localStorage.getItem('servnac_postos')) {
+                localStorage.setItem('servnac_postos', JSON.stringify(DEFAULT_POSTOS));
+            }
+            localPostos = JSON.parse(localStorage.getItem('servnac_postos'));
+
+            // Load reassignments (remanejos)
+            if (!localStorage.getItem('servnac_remanejos')) {
+                localStorage.setItem('servnac_remanejos', JSON.stringify(DEFAULT_REMANEJOS));
+            }
+            localRemanejos = JSON.parse(localStorage.getItem('servnac_remanejos'));
+
+            // Set current date in header
+            const today = new Date();
+            document.getElementById('current-date-badge').innerHTML = `
+                <i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> ${today.toLocaleDateString('pt-BR')}
+            `;
+            document.getElementById('remanejo-data').value = today.toISOString().split('T')[0];
+
+            // Render all UI tables and graphics
+            renderDashboard();
+            renderSelects();
+            renderColaboradores();
+            renderPostos();
+            applyReportFilters(); // Standard first load report
+            setupExcelImport();
+        }
+
+        window.onload = function() {
+            initApp();
+        }
+
+        /* ----------------- PERSISTENCE WRITERS ----------------- */
+        function saveColaboradores() {
+            localStorage.setItem('servnac_colab', JSON.stringify(localColaboradores));
+            renderColaboradores();
+            renderSelects();
+            updateStats();
+        }
+
+        function savePostos() {
+            localStorage.setItem('servnac_postos', JSON.stringify(localPostos));
+            renderPostos();
+            renderSelects();
+            updateStats();
+        }
+
+        function saveRemanejos() {
+            localStorage.setItem('servnac_remanejos', JSON.stringify(localRemanejos));
+            renderDashboard();
+            updateStats();
+        }
+
+        /* ----------------------- TABS ROUTER ----------------------- */
+        function switchTab(tabId) {
+            // Hide all
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            // Show selected
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Deactivate all sidebar items
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white', 'shadow-inner');
+                btn.classList.add('text-brand-200', 'hover:bg-brand-700', 'hover:text-white');
+            });
+
+            // Activate current sidebar item
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-700', 'text-white', 'shadow-inner');
+                activeBtn.classList.remove('text-brand-200', 'hover:bg-brand-700', 'hover:text-white');
+            }
+
+            // Set Header Title
+            const titles = {
+                'tab-dashboard': 'Painel de Controle',
+                'tab-novo-remanejo': 'Lançar Novo Remanejo',
+                'tab-relatorios': 'Relatórios & Exportação',
+                'tab-colaboradores': 'Gestão de Colaboradores',
+                'tab-postos': 'Postos de Serviço'
+            };
+            document.getElementById('page-title').textContent = titles[tabId] || 'Servnac';
+            
+            // Re-render chart on tab select to solve rendering dimension issues
+            if (tabId === 'tab-dashboard') {
+                setTimeout(renderChart, 50);
+            }
+        }
+
+        function toggleMobileMenu() {
+            const nav = document.getElementById('sidebar-nav');
+            nav.classList.toggle('hidden');
+        }
+
+        /* ----------------------- STATS & CALCULATIONS ----------------------- */
+        function updateStats() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayCount = localRemanejos.filter(r => r.data === todayStr).length;
+            
+            document.getElementById('stat-today-remanejos').textContent = todayCount;
+            document.getElementById('stat-total-colaboradores').textContent = localColaboradores.length;
+            document.getElementById('stat-total-postos').textContent = localPostos.length;
+            document.getElementById('stat-total-substituicoes').textContent = localRemanejos.length;
+        }
+
+        /* ----------------------- DASHBOARD ENGINE ----------------------- */
+        function renderDashboard() {
+            updateStats();
+            renderChart();
+            
+            // Build recent activities list
+            const recentList = document.getElementById('dashboard-recent-list');
+            const sorted = [...localRemanejos].sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            if (sorted.length === 0) {
+                recentList.innerHTML = `<p class="text-slate-400 text-xs text-center py-8">Nenhum remanejo registrado.</p>`;
+                return;
+            }
+
+            recentList.innerHTML = sorted.slice(0, 10).map(r => `
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 flex items-start justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] bg-brand-100 text-brand-700 px-2 py-0.5 rounded font-bold uppercase">${r.motivo}</span>
+                        <h5 class="text-xs font-bold text-slate-800">${r.postoNome}</h5>
+                        <p class="text-[11px] text-slate-500">
+                            <span class="text-red-500 font-semibold">${r.saindoNome}</span> 
+                            <i class="fa-solid fa-arrow-right text-[9px] mx-1"></i> 
+                            <span class="text-emerald-600 font-semibold">${r.entrandoNome}</span>
+                        </p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-semibold">${formatBrazilianDate(r.data)}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('motivesChart');
+            if (!ctx) return;
+
+            // Group reasons
+            const dataCounts = { 'Falta': 0, 'Atestado': 0, 'Férias': 0, 'Folga': 0, 'Licença': 0, 'Reciclagem': 0, 'Outro': 0 };
+            localRemanejos.forEach(r => {
+                if (dataCounts[r.motivo] !== undefined) {
+                    dataCounts[r.motivo]++;
+                } else {
+                    dataCounts['Outro']++;
+                }
+            });
+
+            if (motivesChartInstance) {
+                motivesChartInstance.destroy();
+            }
+
+            motivesChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dataCounts),
+                    datasets: [{
+                        data: Object.values(dataCounts),
+                        backgroundColor: [
+                            '#ef4444', // Falta - Red
+                            '#eab308', // Atestado - Gold
+                            '#3b82f6', // Férias - Sky Blue
+                            '#10b981', // Folga - Emerald
+                            '#8b5cf6', // Licença - Purple
+                            '#64748b', // Reciclagem - Cool Grey
+                            '#94a3b8'  // Outro - Light Grey
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: { size: 11, family: 'Inter' },
+                                boxWidth: 12
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /* ----------------------- SELECT DROPDOWN SYNC ----------------------- */
+        function renderSelects() {
+            // Main reassignment form selects
+            const pSel = document.getElementById('remanejo-posto');
+            const sSel = document.getElementById('remanejo-saindo');
+            const eSel = document.getElementById('remanejo-entrando');
+
+            // Reports select
+            const rPostoSel = document.getElementById('report-posto');
+
+            // Populate Postos
+            const postosOpts = localPostos.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+            pSel.innerHTML = `<option value="">Selecione o posto...</option>` + postosOpts;
+            rPostoSel.innerHTML = `<option value="all">Todos os postos</option>` + postosOpts;
+
+            // Populate employees options
+            const colabOpts = localColaboradores.map(c => `
+                <option value="${c.id}">${c.nome} (${c.cargo} - ${c.matricula || 'Sem Matrícula'})</option>
+            `).join('');
+            sSel.innerHTML = `<option value="">Selecione quem está saindo...</option>` + colabOpts;
+            eSel.innerHTML = `<option value="">Selecione o substituto...</option>` + colabOpts;
+        }
+
+        /* ----------------------- REMANEJOS CREATE ----------------------- */
+        function handleCreateRemanejo(e) {
+            e.preventDefault();
+
+            const postoId = document.getElementById('remanejo-posto').value;
+            const saindoId = document.getElementById('remanejo-saindo').value;
+            const entrandoId = document.getElementById('remanejo-entrando').value;
+            const dataVal = document.getElementById('remanejo-data').value;
+            const turnoVal = document.getElementById('remanejo-turno').value;
+            const motivoVal = document.getElementById('remanejo-motivo').value;
+            const obsVal = document.getElementById('remanejo-obs').value;
+
+            if (saindoId === entrandoId) {
+                alert("O colaborador substituto não pode ser igual ao colaborador cedente!");
+                return;
+            }
+
+            const postoObj = localPostos.find(p => p.id === postoId);
+            const saindoObj = localColaboradores.find(c => c.id === saindoId);
+            const entrandoObj = localColaboradores.find(c => c.id === entrandoId);
+
+            const newRemanejo = {
+                id: 'r_' + Date.now(),
+                postoId,
+                postoNome: postoObj.nome,
+                saindoId,
+                saindoNome: saindoObj.nome,
+                entrandoId,
+                entrandoNome: entrandoObj.nome,
+                data: dataVal,
+                turno: turnoVal,
+                motivo: motivoVal,
+                obs: obsVal
+            };
+
+            localRemanejos.push(newRemanejo);
+            saveRemanejos();
+            
+            // Clean up and notify
+            resetForm('remanejo-form');
+            document.getElementById('remanejo-data').value = new Date().toISOString().split('T')[0];
+            
+            alert("Substituição cadastrada com sucesso!");
+            switchTab('tab-dashboard');
+        }
+
+        /* ----------------------- REPORTS SECTION & FILTERS ----------------------- */
+        function handlePeriodPreset() {
+            const period = document.getElementById('report-period').value;
+            const rangeDiv = document.getElementById('custom-dates-range');
+
+            if (period === 'custom') {
+                rangeDiv.classList.remove('hidden');
+            } else {
+                rangeDiv.classList.add('hidden');
+            }
+        }
+
+        function applyReportFilters() {
+            const period = document.getElementById('report-period').value;
+            const filterPosto = document.getElementById('report-posto').value;
+            const filterName = document.getElementById('report-colab').value.toLowerCase().trim();
+
+            let startDate = null;
+            let endDate = null;
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            if (period === 'today') {
+                startDate = new Date(today);
+                endDate = new Date(today);
+            } else if (period === 'week') {
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 7);
+                endDate = new Date(today);
+            } else if (period === 'month') {
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            } else if (period === 'year') {
+                startDate = new Date(today.getFullYear(), 0, 1);
+                endDate = new Date(today.getFullYear(), 11, 31);
+            } else if (period === 'custom') {
+                const sVal = document.getElementById('report-start').value;
+                const eVal = document.getElementById('report-end').value;
+                if (sVal) startDate = new Date(sVal + 'T00:00:00');
+                if (eVal) endDate = new Date(eVal + 'T23:59:59');
+            }
+
+            // Filter calculation process
+            let filtered = localRemanejos.filter(rem => {
+                const remDate = new Date(rem.data + 'T00:00:00');
+                
+                // Date checks
+                if (startDate && remDate < startDate) return false;
+                if (endDate && remDate > endDate) return false;
+
+                // Post check
+                if (filterPosto !== 'all' && rem.postoId !== filterPosto) return false;
+
+                // Colaborador search query check
+                if (filterName) {
+                    const matchCedente = rem.saindoNome.toLowerCase().includes(filterName);
+                    const matchEntrando = rem.entrandoNome.toLowerCase().includes(filterName);
+                    if (!matchCedente && !matchEntrando) return false;
+                }
+
+                return true;
+            });
+
+            // Update Report Meta info
+            let metaTxt = `Visualizando dados por período: ${period.toUpperCase()}`;
+            if (filterPosto !== 'all') {
+                const pObj = localPostos.find(p => p.id === filterPosto);
+                metaTxt += ` | Posto: ${pObj ? pObj.nome : ''}`;
+            }
+            if (filterName) {
+                metaTxt += ` | Filtro nome: "${filterName}"`;
+            }
+            document.getElementById('report-meta-text').textContent = metaTxt;
+            document.getElementById('report-print-date').textContent = `Emitido em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`;
+
+            renderReportTable(filtered);
+        }
+
+        function renderReportTable(data) {
+            const tbody = document.getElementById('report-table-body');
+            
+            document.getElementById('report-summary-total').textContent = data.length;
+            
+            const uniquePostos = new Set(data.map(d => d.postoId));
+            document.getElementById('report-summary-postos').textContent = uniquePostos.size;
+
+            // Calculate dominant reason
+            const counts = {};
+            data.forEach(d => counts[d.motivo] = (counts[d.motivo] || 0) + 1);
+            let dominant = 'N/A';
+            let maxCount = 0;
+            for (const key in counts) {
+                if (counts[key] > maxCount) {
+                    maxCount = counts[key];
+                    dominant = key;
+                }
+            }
+            document.getElementById('report-summary-motivo').textContent = dominant;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-400 font-sans">Nenhum remanejo localizado com os parâmetros selecionados.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(r => `
+                <tr class="hover:bg-slate-50 transition-all">
+                    <td class="p-3 font-medium whitespace-nowrap">${formatBrazilianDate(r.data)}</td>
+                    <td class="p-3 font-semibold text-slate-800">${r.postoNome}</td>
+                    <td class="p-3 text-red-600 font-medium">${r.saindoNome}</td>
+                    <td class="p-3 text-emerald-600 font-medium">${r.entrandoNome}</td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-1 text-[10px] bg-slate-100 rounded-md font-bold uppercase">${r.motivo}</span>
+                    </td>
+                    <td class="p-3 text-slate-500 text-[11px]">${r.turno}</td>
+                </tr>
+            `).join('');
+        }
+
+        function printFormattedReport() {
+            window.print();
+        }
+
+        function exportReportToExcel() {
+            // Build raw array
+            const filterPosto = document.getElementById('report-posto').value;
+            const filterName = document.getElementById('report-colab').value.toLowerCase().trim();
+            
+            // Re-filtering for correct export data scope
+            const period = document.getElementById('report-period').value;
+            let startDate = null; let endDate = null;
+            const today = new Date(); today.setHours(0,0,0,0);
+            if (period === 'today') { startDate = today; endDate = today; }
+            else if (period === 'week') { startDate = new Date(today); startDate.setDate(today.getDate() - 7); endDate = today; }
+            else if (period === 'month') { startDate = new Date(today.getFullYear(), today.getMonth(), 1); endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); }
+            else if (period === 'year') { startDate = new Date(today.getFullYear(), 0, 1); endDate = new Date(today.getFullYear(), 11, 31); }
+
+            let dataToExport = localRemanejos.filter(rem => {
+                const remDate = new Date(rem.data + 'T00:00:00');
+                if (startDate && remDate < startDate) return false;
+                if (endDate && remDate > endDate) return false;
+                if (filterPosto !== 'all' && rem.postoId !== filterPosto) return false;
+                if (filterName) {
+                    const matchC = rem.saindoNome.toLowerCase().includes(filterName);
+                    const matchE = rem.entrandoNome.toLowerCase().includes(filterName);
+                    if (!matchC && !matchE) return false;
+                }
+                return true;
+            });
+
+            if (dataToExport.length === 0) {
+                alert("Não existem dados filtrados para exportar!");
+                return;
+            }
+
+            // Map data structure for Excel columns
+            const excelRows = dataToExport.map(r => ({
+                'Data do Remanejo': formatBrazilianDate(r.data),
+                'Posto de Trabalho': r.postoNome,
+                'Colaborador Cedente (Saindo)': r.saindoNome,
+                'Colaborador Substituto (Entrando)': r.entrandoNome,
+                'Turno da Escala': r.turno,
+                'Motivo Principal': r.motivo,
+                'Justificativa / Observação': r.obs
+            }));
+
+            // Excel generation
+            const worksheet = XLSX.utils.json_to_sheet(excelRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Remanejos");
+
+            // Save file
+            XLSX.writeFile(workbook, `Servnac_Relatorio_Remanejos_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        /* ----------------------- COLABORADORES REGISTER (CRUD) ----------------------- */
+        function renderColaboradores() {
+            const tbody = document.getElementById('colab-table-body');
+            if (localColaboradores.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-sans">Nenhum colaborador cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = localColaboradores.map(c => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3 font-semibold text-slate-800">${c.nome}</td>
+                    <td class="p-3">${c.cargo}</td>
+                    <td class="p-3 font-mono text-slate-500">${c.matricula || '-'}</td>
+                    <td class="p-3 text-slate-500">${c.cpf || '-'}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteColaborador('${c.id}')" class="text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleCreateColab(e) {
+            e.preventDefault();
+            const nome = document.getElementById('colab-nome').value.trim();
+            const cpf = document.getElementById('colab-cpf').value.trim();
+            const cargo = document.getElementById('colab-cargo').value;
+            const matricula = document.getElementById('colab-matricula').value.trim();
+
+            const newC = {
+                id: 'c_' + Date.now(),
+                nome,
+                cpf,
+                cargo,
+                matricula
+            };
+
+            localColaboradores.push(newC);
+            saveColaboradores();
+            resetForm('colab-form');
+            alert("Colaborador cadastrado com sucesso!");
+        }
+
+        function deleteColaborador(id) {
+            if (confirm("Deseja realmente remover este colaborador do banco de dados?")) {
+                localColaboradores = localColaboradores.filter(c => c.id !== id);
+                saveColaboradores();
+            }
+        }
+
+        function filterColabTable() {
+            const query = document.getElementById('search-colab-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#colab-table-body tr');
+
+            rows.forEach(row => {
+                const nameText = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+                if (nameText.includes(query)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        /* ----------------------- POSTOS REGISTER (CRUD) ----------------------- */
+        function renderPostos() {
+            const tbody = document.getElementById('postos-table-body');
+            if (localPostos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 font-sans">Nenhum posto de serviço cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = localPostos.map(p => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3 font-semibold text-slate-800">${p.nome}</td>
+                    <td class="p-3 text-slate-500">${p.endereco || '-'}, ${p.cidade}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deletePosto('${p.id}')" class="text-red-500 hover:text-red-700 transition px-2 py-1 rounded hover:bg-red-50">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleCreatePosto(e) {
+            e.preventDefault();
+            const nome = document.getElementById('posto-nome').value.trim();
+            const endereco = document.getElementById('posto-endereco').value.trim();
+            const cidade = document.getElementById('posto-cidade').value.trim();
+
+            const newP = {
+                id: 'p_' + Date.now(),
+                nome,
+                endereco,
+                cidade
+            };
+
+            localPostos.push(newP);
+            savePostos();
+            resetForm('posto-form');
+            alert("Posto de serviço adicionado com sucesso!");
+        }
+
+        function deletePosto(id) {
+            if (confirm("Remover este posto do sistema?")) {
+                localPostos = localPostos.filter(p => p.id !== id);
+                savePostos();
+            }
+        }
+
+        function filterPostosTable() {
+            const query = document.getElementById('search-posto-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#postos-table-body tr');
+
+            rows.forEach(row => {
+                const nameText = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+                if (nameText.includes(query)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        /* ----------------------- EXCEL SHEET IMPORT ENGINE ----------------------- */
+        function setupExcelImport() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('excel-file-input');
+
+            // Drag over events
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-brand-500', 'bg-emerald-50/20');
+                }, false);
+            });
+
+            // Drag leave events
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('border-brand-500', 'bg-emerald-50/20');
+                }, false);
+            });
+
+            // Handle dropped files
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) handleExcelParsing(files[0]);
+            }, false);
+
+            // Handle input selection
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) handleExcelParsing(e.target.files[0]);
+            });
+        }
+
+        function handleExcelParsing(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convert sheet to JSON rows
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                processExcelData(jsonData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(rows) {
+            if (!rows || rows.length === 0) {
+                alert("Nenhum registro localizado no arquivo selecionado.");
+                return;
+            }
+
+            parsedBulkEmployees = [];
+
+            // Attempting to match structural column names
+            rows.forEach(row => {
+                // Find potential column properties mapping
+                const nome = row['Nome'] || row['NOME'] || row['Colaborador'] || row['nome'] || Object.values(row)[0];
+                const cargo = row['Cargo'] || row['CARGO'] || row['Função'] || row['função'] || 'Vigilante';
+                const matricula = row['Matricula'] || row['Matrícula'] || row['MATRICULA'] || row['id'] || '';
+                const cpf = row['CPF'] || row['cpf'] || '';
+
+                if (nome && String(nome).trim()) {
+                    parsedBulkEmployees.push({
+                        id: 'c_bulk_' + Math.random().toString(36).substr(2, 9),
+                        nome: String(nome).trim(),
+                        cargo: String(cargo).trim(),
+                        matricula: String(matricula).trim(),
+                        cpf: String(cpf).trim()
+                    });
+                }
+            });
+
+            // Render Preview Table
+            const countLabel = document.getElementById('preview-count-label');
+            const tbody = document.getElementById('excel-preview-tbody');
+            const previewBox = document.getElementById('excel-preview-box');
+
+            countLabel.textContent = `Detectados: ${parsedBulkEmployees.length} colaboradores na planilha`;
+            tbody.innerHTML = parsedBulkEmployees.slice(0, 15).map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2 font-semibold text-slate-800">${p.nome}</td>
+                    <td class="p-2">${p.cargo}</td>
+                    <td class="p-2 font-mono text-slate-500">${p.matricula || '-'}</td>
+                </tr>
+            `).join('') + (parsedBulkEmployees.length > 15 ? `<tr><td colspan="3" class="p-2 text-center text-slate-400 font-sans italic">... e mais ${parsedBulkEmployees.length - 15} registros.</td></tr>` : '');
+
+            previewBox.classList.remove('hidden');
+        }
+
+        function confirmBulkImport() {
+            if (parsedBulkEmployees.length === 0) return;
+
+            // Merge with local dataset
+            localColaboradores = [...localColaboradores, ...parsedBulkEmployees];
+            saveColaboradores();
+
+            // Clear imported buffer
+            parsedBulkEmployees = [];
+            document.getElementById('excel-preview-box').classList.add('hidden');
+            document.getElementById('excel-file-input').value = '';
+
+            alert("Importação em lote realizada com sucesso!");
+        }
+
+        /* ----------------------- UTILITY FORM HANDLERS ----------------------- */
+        function resetForm(formId) {
+            document.getElementById(formId).reset();
+        }
+
+        function formatBrazilianDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    </script>
+</body>
+</html>
