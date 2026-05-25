@@ -65,234 +65,308 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col md:flex-row text-slate-800 antialiased overflow-hidden">
+<body class="h-full text-slate-800 antialiased overflow-hidden">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="no-print w-full md:w-64 bg-brand-800 text-white flex-shrink-0 flex flex-col justify-between shadow-2xl z-20">
-        <div>
-            <div class="p-6 border-b border-brand-700 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-brand-700 font-bold text-xl shadow-md">
-                        <i class="fa-solid fa-users-gear text-brand-700"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-base tracking-wide uppercase">SERVNAC</h1>
-                        <p class="text-[10px] text-brand-300 uppercase tracking-widest font-semibold">Substituições</p>
-                    </div>
+    <!-- LOGIN AREA SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-tr from-brand-900 via-brand-800 to-slate-900 p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transition-all duration-300 transform scale-100">
+            <div class="p-8 text-center bg-gradient-to-b from-brand-800 to-brand-900 text-white pb-10">
+                <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto shadow-lg mb-4">
+                    <i class="fa-solid fa-users-gear text-brand-300"></i>
                 </div>
-                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
+                <h1 class="font-extrabold text-2xl tracking-wide uppercase">REMANEJO SV</h1>
+                <p class="text-xs text-brand-200 mt-1 uppercase tracking-widest font-semibold">Painel de Controle Operacional</p>
             </div>
-            <nav id="sidebar-nav" class="hidden md:block p-4 space-y-1">
-                <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-brand-700 text-white shadow-inner">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                    <span>Painel de Controle</span>
-                </button>
-                <button onclick="switchTab('tab-novo-remanejo')" id="btn-tab-novo-remanejo" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
-                    <i class="fa-solid fa-arrows-rotate w-5 text-center"></i>
-                    <span>Novo Remanejo</span>
-                </button>
-                <button onclick="switchTab('tab-relatorios')" id="btn-tab-relatorios" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
-                    <i class="fa-solid fa-file-invoice w-5 text-center"></i>
-                    <span>Relatórios & Filtros</span>
-                </button>
-                <button onclick="switchTab('tab-colaboradores')" id="btn-tab-colaboradores" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
-                    <i class="fa-solid fa-user-shield w-5 text-center"></i>
-                    <span>Colaboradores</span>
-                </button>
-                <button onclick="switchTab('tab-postos')" id="btn-tab-postos" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
-                    <i class="fa-solid fa-building-user w-5 text-center"></i>
-                    <span>Postos de Serviço</span>
-                </button>
-            </nav>
-        </div>
-        <div class="hidden md:block p-4 border-t border-brand-700 bg-brand-900 bg-opacity-40">
-            <div class="flex items-center space-x-3 text-xs text-brand-300">
-                <span class="relative flex h-2 w-2">
-                    <span id="conn-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span id="conn-dot" class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                </span>
-                <span id="conn-text">Verificando Banco de Dados...</span>
-            </div>
-            <p class="text-[10px] text-slate-500 mt-1">Servnac © 2026</p>
-        </div>
-    </aside>
-
-    <!-- MAIN WORKSPACE -->
-    <main class="flex-1 flex flex-col overflow-hidden">
-        
-        <header class="no-print bg-white border-b border-slate-200 h-16 flex-shrink-0 flex items-center justify-between px-6 shadow-sm">
-            <div class="flex items-center space-x-4">
-                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-600 focus:outline-none">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-                <h2 id="page-title" class="text-lg font-bold text-slate-800">Painel de Controle</h2>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span id="current-date-badge" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg shadow-inner">
-                    <i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> Carregando...
-                </span>
-                <span class="h-6 w-px bg-slate-200"></span>
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow">
-                        OP
-                    </div>
-                    <span class="text-sm font-semibold text-slate-700 hidden sm:inline-block">Operador</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50">
             
-            <!-- TAB 1: DASHBOARD -->
-            <section id="tab-dashboard" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Substituições Hoje</p>
-                            <h3 id="stat-today-remanejos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                            <p class="text-xs text-emerald-600 font-medium mt-1">Registradas hoje</p>
-                        </div>
-                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-arrows-spin"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total de Colaboradores</p>
-                            <h3 id="stat-total-colaboradores" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Registrados no sistema</p>
-                        </div>
-                        <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Postos Ativos</p>
-                            <h3 id="stat-total-postos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Postos sob monitoramento</p>
-                        </div>
-                        <div class="w-12 h-12 bg-emerald-100/40 text-brand-700 rounded-lg flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-building-shield"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Substituições</p>
-                            <h3 id="stat-total-substituicoes" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Histórico geral acumulado</p>
-                        </div>
-                        <div class="w-12 h-12 bg-zinc-100 text-zinc-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
+            <form id="login-form" onsubmit="handleEmailLogin(event)" class="p-8 space-y-5">
+                <div id="login-error-box" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-exclamation text-sm"></i>
+                    <span id="login-error-msg">Erro de autenticação</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">E-mail Corporativo</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-regular fa-envelope"></i>
+                        </span>
+                        <input type="email" id="login-email" required placeholder="exemplo@servnac.com.br" class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Motivos das Ocorrências</h4>
-                            <p class="text-xs text-slate-400 mb-6">Gráfico dinâmico das justificativas mais frequentes para as trocas</p>
-                        </div>
-                        <div class="relative h-64 flex items-center justify-center">
-                            <canvas id="motivesChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[380px]">
-                        <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Últimos Remanejos</h4>
-                        <p class="text-xs text-slate-400 mb-4">Atualizações efetuadas recentemente</p>
-                        <div id="dashboard-recent-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                            <p class="text-slate-400 text-xs text-center py-8">Nenhum remanejo registrado hoje.</p>
-                        </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Senha de Acesso</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                     </div>
                 </div>
-            </section>
 
-            <!-- TAB 2: NOVO REMANEJO -->
-            <section id="tab-novo-remanejo" class="tab-content hidden space-y-6">
-                <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden">
-                    <div class="bg-gradient-to-r from-brand-800 to-brand-700 px-6 py-4 text-white">
-                        <h3 class="font-bold text-base tracking-wide uppercase">Lançar Nova Substituição / Remanejo</h3>
-                        <p class="text-xs text-brand-200">Efetue a escala de cobertura para manter a operação em andamento</p>
-                    </div>
-                    <form id="remanejo-form" onsubmit="handleCreateRemanejo(event)" class="p-6 space-y-6">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">1. Posto de Serviço Onde Ocorrerá a Troca *</label>
-                            <select id="remanejo-posto" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                                <option value="">Selecione o posto...</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                                    <i class="fa-solid fa-user-minus text-red-500 mr-1"></i> Colaborador Cedente (Saindo) *
-                                </label>
-                                <select id="remanejo-saindo" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="">Selecione quem está saindo...</option>
-                                </select>
-                                <p class="text-[11px] text-slate-400 mt-1">Profissional titular da escala que necessita ausentar-se.</p>
-                            </div>
-                            <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                                    <i class="fa-solid fa-user-plus text-brand-600 mr-1"></i> Colaborador Substituto (Entrando) *
-                                </label>
-                                <select id="remanejo-entrando" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="">Selecione o substituto...</option>
-                                </select>
-                                <p class="text-[11px] text-slate-400 mt-1">Profissional responsável por assumir o posto de cobertura.</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Data do Remanejo *</label>
-                                <input type="date" id="remanejo-data" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Turno de Serviço *</label>
-                                <select id="remanejo-turno" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                                    <option value="Diurno (12x36)">Diurno (12x36)</option>
-                                    <option value="Noturno (12x36)">Noturno (12x36)</option>
-                                    <option value="Diário Administrativo">Diário Administrativo</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Motivo Principal *</label>
-                                <select id="remanejo-motivo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                                    <option value="Falta">Falta Injustificada</option>
-                                    <option value="Atestado">Atestado Médico</option>
-                                    <option value="Férias">Férias</option>
-                                    <option value="Folga">Folga Escala</option>
-                                    <option value="Licença">Licença / Afastamento</option>
-                                    <option value="Reciclagem">Treinamento / Reciclagem</option>
-                                    <option value="Outro">Outros Motivos</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Observações Adicionais / Histórico</label>
-                            <textarea id="remanejo-obs" rows="3" placeholder="Insira detalhes adicionais sobre o remanejamento ou autorizações especiais..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white"></textarea>
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
-                            <button type="button" onclick="resetForm('remanejo-form')" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
-                                Limpar
-                            </button>
-                            <button type="submit" class="px-6 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md flex items-center space-x-2">
-                                <i class="fa-solid fa-circle-check"></i>
-                                <span>Salvar Remanejo</span>
-                            </button>
-                        </div>
-                    </form>
+                <button type="submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Acessar Painel</span>
+                </button>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Ou acesse com</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
                 </div>
-            </section>
 
-            <!-- TAB 3: RELATÓRIOS & EXPORTAÇÃO -->
-            <section id="tab-relatorios" class="tab-content hidden space-y-6">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm no-print">
-                    <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-4">Mapeador de Filtros de Relatórios</h3>
+                <button type="button" onclick="handleGoogleLogin()" class="w-full py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 shadow-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.65l3.15-3.15C17.45 1.74 14.93 1 12 1 7.37 1 3.4 3.66 1.48 7.56l3.89 3.02C6.31 7.54 8.94 5.04 12 5.04z"/>
+                        <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.12 2.73-2.38 3.58l3.7 2.87c2.16-1.99 3.41-4.92 3.41-8.6z"/>
+                        <path fill="#FBBC05" d="M5.37 14.58c-.24-.73-.38-1.51-.38-2.32s.14-1.59.38-2.32L1.48 6.92C.54 8.87 0 11.04 0 13.33c0 2.29.54 4.46 1.48 6.41l3.89-3.16z"/>
+                        <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.7-2.87c-1.03.69-2.35 1.1-4.26 1.1-3.06 0-5.69-2.5-6.63-5.54L1.48 15.9c1.92 3.9 5.89 6.56 10.52 6.56z"/>
+                    </svg>
+                    <span>Conta Corporativa Google</span>
+                </button>
+            </form>
+            
+            <div class="p-4 bg-slate-50 border-t border-slate-100 text-center text-[10px] text-slate-400 font-medium">
+                Desenvolvido para Grupo Servnac © 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE (HIDDEN UNTIL AUTHENTICATED) -->
+    <div id="main-app-container" class="hidden h-full flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="no-print w-full md:w-64 bg-brand-800 text-white flex-shrink-0 flex flex-col justify-between shadow-2xl z-20">
+            <div>
+                <div class="p-6 border-b border-brand-700 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-brand-700 font-bold text-xl shadow-md">
+                            <i class="fa-solid fa-users-gear text-brand-700"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-base tracking-wide uppercase">SERVNAC</h1>
+                            <p class="text-[10px] text-brand-300 uppercase tracking-widest font-semibold">Substituições</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+                <nav id="sidebar-nav" class="hidden md:block p-4 space-y-1">
+                    <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-brand-700 text-white shadow-inner">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                        <span>Painel de Controle</span>
+                    </button>
+                    <button onclick="switchTab('tab-novo-remanejo')" id="btn-tab-novo-remanejo" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                        <i class="fa-solid fa-arrows-rotate w-5 text-center"></i>
+                        <span>Novo Remanejo</span>
+                    </button>
+                    <button onclick="switchTab('tab-relatorios')" id="btn-tab-relatorios" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                        <i class="fa-solid fa-file-invoice w-5 text-center"></i>
+                        <span>Relatórios & Filtros</span>
+                    </button>
+                    <button onclick="switchTab('tab-colaboradores')" id="btn-tab-colaboradores" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                        <i class="fa-solid fa-user-shield w-5 text-center"></i>
+                        <span>Colaboradores</span>
+                    </button>
+                    <button onclick="switchTab('tab-postos')" id="btn-tab-postos" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white">
+                        <i class="fa-solid fa-building-user w-5 text-center"></i>
+                        <span>Postos de Serviço</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="hidden md:block p-4 border-t border-brand-700 bg-brand-900 bg-opacity-40">
+                <div class="flex items-center space-x-3 text-xs text-brand-300">
+                    <span class="relative flex h-2 w-2">
+                        <span id="conn-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span id="conn-dot" class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <span id="conn-text">Verificando Banco de Dados...</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1">Servnac © 2026</p>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            
+            <header class="no-print bg-white border-b border-slate-200 h-16 flex-shrink-0 flex items-center justify-between px-6 shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-slate-600 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h2 id="page-title" class="text-lg font-bold text-slate-800">Painel de Controle</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="current-date-badge" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg shadow-inner">
+                        <i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> Carregando...
+                    </span>
+                    <span class="h-6 w-px bg-slate-200"></span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow">
+                            <span id="user-avatar-initials">OP</span>
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <span id="user-name-label" class="text-xs font-bold text-slate-700 block">Operador</span>
+                            <span id="user-role-badge" class="text-[9px] font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">Padrão</span>
+                        </div>
+                        <button onclick="handleLogout()" title="Sair do Sistema" class="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500 transition ml-2">
+                            <i class="fa-solid fa-power-off text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50">
+                
+                <!-- TAB 1: DASHBOARD -->
+                <section id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Substituições Hoje</p>
+                                <h3 id="stat-today-remanejos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                                <p class="text-xs text-emerald-600 font-medium mt-1">Registradas hoje</p>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-arrows-spin"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total de Colaboradores</p>
+                                <h3 id="stat-total-colaboradores" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                                <p class="text-xs text-slate-400 mt-1">Registrados no sistema</p>
+                            </div>
+                            <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Postos Ativos</p>
+                                <h3 id="stat-total-postos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                                <p class="text-xs text-slate-400 mt-1">Postos sob monitoramento</p>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-100/40 text-brand-700 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-building-shield"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Substituições</p>
+                                <h3 id="stat-total-substituicoes" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                                <p class="text-xs text-slate-400 mt-1">Histórico geral acumulado</p>
+                            </div>
+                            <div class="w-12 h-12 bg-zinc-100 text-zinc-600 rounded-lg flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Motivos das Ocorrências</h4>
+                                <p class="text-xs text-slate-400 mb-6">Gráfico dinâmico das justificativas mais frequentes para as trocas</p>
+                            </div>
+                            <div class="relative h-64 flex items-center justify-center">
+                                <canvas id="motivesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[380px]">
+                            <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Últimos Remanejos</h4>
+                            <p class="text-xs text-slate-400 mb-4">Atualizações efetuadas recentemente</p>
+                            <div id="dashboard-recent-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                                <p class="text-slate-400 text-xs text-center py-8">Nenhum remanejo registrado hoje.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: NOVO REMANEJO -->
+                <section id="tab-novo-remanejo" class="tab-content hidden space-y-6">
+                    <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden">
+                        <div class="bg-gradient-to-r from-brand-800 to-brand-700 px-6 py-4 text-white">
+                            <h3 class="font-bold text-base tracking-wide uppercase">Lançar Nova Substituição / Remanejo</h3>
+                            <p class="text-xs text-brand-200">Efetue a escala de cobertura para manter a operation em andamento</p>
+                        </div>
+                        <form id="remanejo-form" onsubmit="handleCreateRemanejo(event)" class="p-6 space-y-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">1. Posto de Serviço Onde Ocorrerá a Troca *</label>
+                                <select id="remanejo-posto" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                    <option value="">Selecione o posto...</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                                        <i class="fa-solid fa-user-minus text-red-500 mr-1"></i> Colaborador Cedente (Saindo) *
+                                    </label>
+                                    <select id="remanejo-saindo" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <option value="">Selecione quem está saindo...</option>
+                                    </select>
+                                    <p class="text-[11px] text-slate-400 mt-1">Profissional titular da escala que necessita ausentar-se.</p>
+                                </div>
+                                <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                                        <i class="fa-solid fa-user-plus text-brand-600 mr-1"></i> Colaborador Substituto (Entrando) *
+                                    </label>
+                                    <select id="remanejo-entrando" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <option value="">Selecione o substituto...</option>
+                                    </select>
+                                    <p class="text-[11px] text-slate-400 mt-1">Profissional responsável por assumir o posto de cobertura.</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Data do Remanejo *</label>
+                                    <input type="date" id="remanejo-data" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Turno de Serviço *</label>
+                                    <select id="remanejo-turno" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                        <option value="Diurno (12x36)">Diurno (12x36)</option>
+                                        <option value="Noturno (12x36)">Noturno (12x36)</option>
+                                        <option value="Diário Administrativo">Diário Administrativo</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Motivo Principal *</label>
+                                    <select id="remanejo-motivo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                        <option value="Falta">Falta Injustificada</option>
+                                        <option value="Atestado">Atestado Médico</option>
+                                        <option value="Férias">Férias</option>
+                                        <option value="Folga">Folga Escala</option>
+                                        <option value="Licença">Licença / Afastamento</option>
+                                        <option value="Reciclagem">Treinamento / Reciclagem</option>
+                                        <option value="Outro">Outros Motivos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Observações Adicionais / Histórico</label>
+                                <textarea id="remanejo-obs" rows="3" placeholder="Insira detalhes adicionais sobre o remanejamento ou autorizações especiais..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                                <button type="button" onclick="resetForm('remanejo-form')" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+                                    Limpar
+                                </button>
+                                <button type="submit" class="px-6 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md flex items-center space-x-2">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Salvar Remanejo</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- TAB 3: RELATÓRIOS & EXPORTAÇÃO -->
+                <section id="tab-relatorios" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm no-print">
+                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-4">Mapeador de Filtros de Relatórios</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Filtro de Período</label>
                             <select id="report-period" onchange="handlePeriodPreset()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
@@ -338,211 +412,224 @@
                             <span>Exportar Excel</span>
                         </button>
                     </div>
-                </div>
-
-                <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm print-container">
-                    <div class="border-b-2 border-brand-700 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-slate-800 tracking-wide">RELATÓRIO DE REMANEJOS & SUBSTITUIÇÕES</h2>
-                            <p class="text-xs text-brand-700 font-bold uppercase mt-0.5">Grupo Servnac Segurança Eletrônica e Vigilância</p>
-                            <p class="text-[11px] text-slate-400 font-sans mt-0.5" id="report-meta-text">Filtro ativo: Todos os registros</p>
-                        </div>
-                        <div class="text-right mt-3 sm:mt-0">
-                            <p class="text-[11px] text-slate-600 font-semibold uppercase">Controle Operacional</p>
-                            <p class="text-[10px] text-slate-400" id="report-print-date">Emitido em: --/--/----</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-4 mb-6 text-center">
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <span class="block text-xs font-medium text-slate-400 uppercase">Total Selecionado</span>
-                            <span id="report-summary-total" class="text-lg font-bold text-slate-800">0</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <span class="block text-xs font-medium text-slate-400 uppercase">Postos Atendidos</span>
-                            <span id="report-summary-postos" class="text-lg font-bold text-slate-800">0</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <span class="block text-xs font-medium text-slate-400 uppercase">Motivo Frequente</span>
-                            <span id="report-summary-motivo" class="text-xs font-bold text-emerald-800 uppercase leading-5">N/A</span>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b border-slate-200 uppercase">
-                                    <th class="p-3">Data</th>
-                                    <th class="p-3">Posto de Serviço</th>
-                                    <th class="p-3">Cedente (Saindo)</th>
-                                    <th class="p-3">Substituto (Entrando)</th>
-                                    <th class="p-3">Motivo</th>
-                                    <th class="p-3">Escala/Turno</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
-                                <tr>
-                                    <td colspan="6" class="p-8 text-center text-slate-400 font-sans">Use os filtros acima e clique em "Gerar Relatório" para ver os dados.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="hidden print:block mt-16 pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 text-center">
-                        <div>
-                            <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
-                            <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Operador de Tráfego</span>
-                        </div>
-                        <div>
-                            <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
-                            <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Coordenador Operacional</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 4: COLABORADORES -->
-            <section id="tab-colaboradores" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
-                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Colaborador</h3>
-                        <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo vigia / segurança</p>
-                        <form id="colab-form" onsubmit="handleCreateColab(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome Completo *</label>
-                                <input type="text" id="colab-nome" required placeholder="Digite o nome..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">RE / Matrícula</label>
-                                <input type="text" id="colab-re" placeholder="Ex: 12044" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Cargo / Função</label>
-                                <select id="colab-cargo" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                                    <option value="Vigilante">Vigilante</option>
-                                    <option value="Vigilante Condutor">Vigilante Condutor</option>
-                                    <option value="Vigilante Lider">Vigilante Líder</option>
-                                    <option value="Vigia / Porteiro">Vigia / Porteiro</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                            </div>
-                            <div class="flex justify-end space-x-2 pt-2">
-                                <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md">
-                                    Salvar Colaborador
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <!-- Colaboradores - Importação em Lote -->
-                        <div class="mt-6 pt-6 border-t border-slate-100">
-                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Importação em Lote</h4>
-                            <p class="text-[11px] text-slate-400 mb-3">Selecione uma planilha Excel contendo as colunas: <strong class="text-slate-600">Nome, RE, Cargo</strong>.</p>
-                            <button onclick="document.getElementById('colab-import-file').click()" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                                <i class="fa-solid fa-file-excel"></i>
-                                <span>Importar Planilha</span>
-                            </button>
-                            <input type="file" id="colab-import-file" class="hidden" accept=".xlsx, .xls" onchange="handleImportColabExcel(event)">
-                        </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-slate-100">
+                    <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm print-container">
+                        <div class="border-b-2 border-brand-700 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                             <div>
-                                <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Profissionais Cadastrados</h3>
-                                <p class="text-xs text-slate-400">Banco de dados ativo de funcionários</p>
+                                <h2 class="text-xl font-extrabold text-slate-800 tracking-wide">RELATÓRIO DE REMANEJOS & SUBSTITUIÇÕES</h2>
+                                <p class="text-xs text-brand-700 font-bold uppercase mt-0.5">Grupo Servnac Segurança Eletrônica e Vigilância</p>
+                                <p class="text-[11px] text-slate-400 font-sans mt-0.5" id="report-meta-text">Filtro ativo: Todos os registros</p>
                             </div>
-                            <div class="mt-2 sm:mt-0 w-full sm:w-64">
-                                <input type="text" id="colab-search" oninput="renderColaboradores()" placeholder="Pesquisar por nome..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                            <div class="text-right mt-3 sm:mt-0">
+                                <p class="text-[11px] text-slate-600 font-semibold uppercase">Controle Operacional</p>
+                                <p class="text-[10px] text-slate-400" id="report-print-date">Emitido em: --/--/----</p>
                             </div>
                         </div>
-                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <span class="block text-xs font-medium text-slate-400 uppercase">Total Selecionado</span>
+                                <span id="report-summary-total" class="text-lg font-bold text-slate-800">0</span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <span class="block text-xs font-medium text-slate-400 uppercase">Postos Atendidos</span>
+                                <span id="report-summary-postos" class="text-lg font-bold text-slate-800">0</span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <span class="block text-xs font-medium text-slate-400 uppercase">Motivo Frequente</span>
+                                <span id="report-summary-motivo" class="text-xs font-bold text-emerald-800 uppercase leading-5">N/A</span>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50 text-slate-500 text-[11px] font-bold border-b border-slate-200 uppercase tracking-wider">
-                                        <th class="p-3">RE</th>
-                                        <th class="p-3">Nome do Colaborador</th>
-                                        <th class="p-3">Cargo/Função</th>
-                                        <th class="p-3 text-center">Ações</th>
+                                    <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b border-slate-200 uppercase">
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Posto de Serviço</th>
+                                        <th class="p-3">Cedente (Saindo)</th>
+                                        <th class="p-3">Substituto (Entrando)</th>
+                                        <th class="p-3">Motivo</th>
+                                        <th class="p-3">Escala/Turno</th>
                                     </tr>
                                 </thead>
-                                <tbody id="colaboradores-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                <tbody id="report-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
                                     <tr>
-                                        <td colspan="4" class="p-6 text-center text-slate-400">Nenhum colaborador registrado.</td>
+                                        <td colspan="6" class="p-8 text-center text-slate-400 font-sans">Use os filtros acima e clique em "Gerar Relatório" para ver os dados.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <div class="hidden print:block mt-16 pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 text-center">
+                            <div>
+                                <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
+                                <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Operador de Tráfego</span>
+                            </div>
+                            <div>
+                                <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
+                                <span class="block text-[10px] text-slate-500 uppercase font-semibold mt-2">Visto Coordenador Operacional</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- TAB 5: POSTOS DE SERVIÇO (Atualizado para incluir Importação em Lote) -->
-            <section id="tab-postos" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
-                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Posto</h3>
-                        <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo posto de serviço</p>
-                        <form id="posto-form" onsubmit="handleCreatePosto(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome do Posto *</label>
-                                <input type="text" id="posto-nome" required placeholder="Digite o nome do posto..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Endereço / Localização</label>
-                                <input type="text" id="posto-endereco" placeholder="Ex: Av. Santos Dumont, 1000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Cidade</label>
-                                <input type="text" id="posto-cidade" placeholder="Ex: Fortaleza" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
-                            </div>
-                            <div class="flex justify-end space-x-2 pt-2">
-                                <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md">
-                                    Salvar Posto
+                <!-- TAB 4: COLABORADORES -->
+                <section id="tab-colaboradores" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
+                            <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Colaborador</h3>
+                            <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo vigia / segurança</p>
+                            <form id="colab-form" onsubmit="handleCreateColab(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome Completo *</label>
+                                    <input type="text" id="colab-nome" required placeholder="Digite o nome..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">RE / Matrícula</label>
+                                    <input type="text" id="colab-re" placeholder="Ex: 12044" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Cargo / Função</label>
+                                    <select id="colab-cargo" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                        <option value="Vigilante">Vigilante</option>
+                                        <option value="Vigilante Condutor">Vigilante Condutor</option>
+                                        <option value="Vigilante Lider">Vigilante Líder</option>
+                                        <option value="Vigia / Porteiro">Vigia / Porteiro</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-end space-x-2 pt-2">
+                                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md">
+                                        Salvar Colaborador
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Colaboradores - Importação em Lote (Restricted Area) -->
+                            <div id="colab-import-container" class="mt-6 pt-6 border-t border-slate-100">
+                                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Importação em Lote</h4>
+                                <p class="text-[11px] text-slate-400 mb-3">Selecione uma planilha Excel contendo as colunas: <strong class="text-slate-600">Nome, RE, Cargo</strong>.</p>
+                                <button onclick="document.getElementById('colab-import-file').click()" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Importar Planilha</span>
                                 </button>
+                                <input type="file" id="colab-import-file" class="hidden" accept=".xlsx, .xls" onchange="handleImportColabExcel(event)">
                             </div>
-                        </form>
-                        
-                        <!-- Postos - Importação em Lote -->
-                        <div class="mt-6 pt-6 border-t border-slate-100">
-                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Importação em Lote</h4>
-                            <p class="text-[11px] text-slate-400 mb-3">Selecione uma planilha Excel contendo as colunas: <strong class="text-slate-600">Nome, Endereco, Cidade</strong>.</p>
-                            <button onclick="document.getElementById('posto-import-file').click()" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                                <i class="fa-solid fa-file-excel"></i>
-                                <span>Importar Planilha</span>
-                            </button>
-                            <input type="file" id="posto-import-file" class="hidden" accept=".xlsx, .xls" onchange="handleImportPostoExcel(event)">
+                            <!-- Restricted warning overlay if not admin -->
+                            <div id="colab-restricted-msg" class="hidden mt-6 pt-6 border-t border-slate-100 text-center p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <i class="fa-solid fa-lock text-slate-400 mb-1.5 block text-lg"></i>
+                                <span class="text-[11px] font-bold text-slate-500 uppercase block">Importação Bloqueada</span>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">Disponível apenas para contas de Administrador.</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-slate-100">
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Postos Ativos</h3>
-                                <p class="text-xs text-slate-400">Banco de dados ativo de postos atendidos</p>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Profissionais Cadastrados</h3>
+                                    <p class="text-xs text-slate-400">Banco de dados ativo de funcionários</p>
+                                </div>
+                                <div class="mt-2 sm:mt-0 w-full sm:w-64">
+                                    <input type="text" id="colab-search" oninput="renderColaboradores()" placeholder="Pesquisar por nome..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
                             </div>
-                            <div class="mt-2 sm:mt-0 w-full sm:w-64">
-                                <input type="text" id="posto-search" oninput="renderPostos()" placeholder="Pesquisar por nome do posto..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                            <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 text-[11px] font-bold border-b border-slate-200 uppercase tracking-wider">
+                                            <th class="p-3">RE</th>
+                                            <th class="p-3">Nome do Colaborador</th>
+                                            <th class="p-3">Cargo/Função</th>
+                                            <th class="p-3 text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="colaboradores-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                        <tr>
+                                            <td colspan="4" class="p-6 text-center text-slate-400">Nenhum colaborador registrado.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        </div>
-                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 text-slate-500 text-[11px] font-bold border-b border-slate-200 uppercase tracking-wider">
-                                        <th class="p-3">Posto</th>
-                                        <th class="p-3">Endereço</th>
-                                        <th class="p-3">Cidade</th>
-                                        <th class="p-3 text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="postos-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
-                                    <tr>
-                                        <td colspan="4" class="p-6 text-center text-slate-400">Nenhum posto registrado.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
-                </div>
-            </section>
-        </div>
-    </main>
+                </section>
+
+                <!-- TAB 5: POSTOS DE SERVIÇO -->
+                <section id="tab-postos" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
+                            <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Posto</h3>
+                            <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo posto de serviço</p>
+                            <form id="posto-form" onsubmit="handleCreatePosto(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome do Posto *</label>
+                                    <input type="text" id="posto-nome" required placeholder="Digite o nome do posto..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Endereço / Localização</label>
+                                    <input type="text" id="posto-endereco" placeholder="Ex: Av. Santos Dumont, 1000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Cidade</label>
+                                    <input type="text" id="posto-cidade" placeholder="Ex: Fortaleza" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                                <div class="flex justify-end space-x-2 pt-2">
+                                    <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-sm transition shadow-md">
+                                        Salvar Posto
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Postos - Importação em Lote (Restricted Area) -->
+                            <div id="posto-import-container" class="mt-6 pt-6 border-t border-slate-100">
+                                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Importação em Lote</h4>
+                                <p class="text-[11px] text-slate-400 mb-3">Selecione uma planilha Excel contendo as colunas: <strong class="text-slate-600">Nome, Endereco, Cidade</strong>.</p>
+                                <button onclick="document.getElementById('posto-import-file').click()" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Importar Planilha</span>
+                                </button>
+                                <input type="file" id="posto-import-file" class="hidden" accept=".xlsx, .xls" onchange="handleImportPostoExcel(event)">
+                            </div>
+                            <!-- Restricted warning overlay if not admin -->
+                            <div id="posto-restricted-msg" class="hidden mt-6 pt-6 border-t border-slate-100 text-center p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <i class="fa-solid fa-lock text-slate-400 mb-1.5 block text-lg"></i>
+                                <span class="text-[11px] font-bold text-slate-500 uppercase block">Importação Bloqueada</span>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">Disponível apenas para contas de Administrador.</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Postos Ativos</h3>
+                                    <p class="text-xs text-slate-400">Banco de dados ativo de postos atendidos</p>
+                                </div>
+                                <div class="mt-2 sm:mt-0 w-full sm:w-64">
+                                    <input type="text" id="posto-search" oninput="renderPostos()" placeholder="Pesquisar por nome do posto..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 text-[11px] font-bold border-b border-slate-200 uppercase tracking-wider">
+                                            <th class="p-3">Posto</th>
+                                            <th class="p-3">Endereço</th>
+                                            <th class="p-3">Cidade</th>
+                                            <th class="p-3 text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="postos-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
+                                        <tr>
+                                            <td colspan="4" class="p-6 text-center text-slate-400">Nenhum posto registrado.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
 
     <!-- CUSTOM NOTIFICATION (TOAST) DIALOG -->
     <div id="toast-container" class="no-print fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
@@ -568,13 +655,14 @@
         let isFirebaseOnline = false;
         let activeTab = 'tab-dashboard';
         let chartInstance = null;
+        let userRole = 'operator'; // 'admin' ou 'operator'
         
         // Local Memory Fallback arrays
         let colaboradoresList = [];
         let postosList = [];
         let remanejosList = [];
 
-        // Custom Toast System (Replacer for Alert)
+        // Custom Toast System
         function showNotification(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -616,14 +704,11 @@
             document.getElementById('current-date-badge').innerHTML = `<i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> ${today.toLocaleDateString('pt-BR', formatOptions)}`;
             document.getElementById('report-print-date').innerText = `Emitido em: ${today.toLocaleDateString('pt-BR')} às ${today.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
             
-            // Try Loading Firebase or Fallback
+            // Try Loading Firebase configuration
             await setupFirebaseConnection();
             
-            // Build visual tools
-            initMotivesChart();
-            loadSampleDataIfNeeded();
-            syncDashboardStats();
-            updateFormSelects();
+            // Check session status (Offline check or Online check)
+            checkLocalSession();
         }
 
         // Setup Firebase Configs & Authentication
@@ -637,8 +722,7 @@
                 isFirebaseOnline = false;
                 connPing.className = "absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-pulse";
                 connDot.className = "relative inline-flex rounded-full h-2 w-2 bg-red-500";
-                connText.innerText = "Modo Local Offline (API não configurada)";
-                showNotification("Firebase não configurado no código. Utilizando armazenamento local.", "info");
+                connText.innerText = "Modo Local Offline (Firebase pendente)";
                 return;
             }
 
@@ -651,21 +735,32 @@
                         app = firebase.app();
                     }
                     
-                    const auth = firebase.auth();
                     database = firebase.firestore();
-                    
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await auth.signInWithCustomToken(__initial_auth_token);
-                    } else {
-                        await auth.signInAnonymously();
-                    }
-                    
                     isFirebaseOnline = true;
+                    
                     connPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
                     connDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
                     connText.innerText = "Firebase Sincronizado!";
                     
-                    listenToFirestore();
+                    // Sincroniza estado de autenticação online
+                    firebase.auth().onAuthStateChanged(user => {
+                        if (user) {
+                            const email = user.email || '';
+                            const name = user.displayName || 'Operador Google';
+                            
+                            // Define perfil com base no email (Admin vs Operator)
+                            if (email === "admin@servnac.com.br") {
+                                userRole = 'admin';
+                            } else {
+                                userRole = 'operator';
+                            }
+                            
+                            enterApplication(name, email, userRole);
+                            listenToFirestore();
+                        } else {
+                            exitApplication();
+                        }
+                    });
                     
                 } catch (error) {
                     console.error("Erro ao conectar no Firebase", error);
@@ -673,9 +768,151 @@
                     connPing.className = "absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-pulse";
                     connDot.className = "relative inline-flex rounded-full h-2 w-2 bg-red-500";
                     connText.innerText = "Modo Local Offline (Falha de Rede)";
-                    showNotification("Falha na conexão com o banco. Utilizando armazenamento local temporário.", "info");
                 }
             }
+        }
+
+        // Local session storage check (mainly for local fallback)
+        function checkLocalSession() {
+            if (isFirebaseOnline) return; // Managed by onAuthStateChanged
+
+            const loggedUser = localStorage.getItem('servnac_logged_user');
+            if (loggedUser) {
+                const session = JSON.parse(loggedUser);
+                enterApplication(session.name, session.email, session.role);
+            } else {
+                exitApplication();
+            }
+        }
+
+        // LOGIN WITH ADMIN USERNAME & PASSWORD
+        async function handleEmailLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('login-error-box');
+            const errorMsg = document.getElementById('login-error-msg');
+
+            errorBox.classList.add('hidden');
+
+            // Caso especial: login Administrador Padrão (Offline / Online)
+            if (email === "admin@servnac.com.br" && password === "adminServnac2026") {
+                userRole = 'admin';
+                if (isFirebaseOnline) {
+                    try {
+                        // Tenta autenticar no Firebase com essa conta
+                        await firebase.auth().signInWithEmailAndPassword(email, password);
+                        // O listener `onAuthStateChanged` cuidará do redirecionamento
+                    } catch (err) {
+                        // Se a conta não existir no Firebase, faz login local para não travar o usuário
+                        console.warn("Conta admin@servnac.com.br não registrada no Firebase Auth. Efetuando login local de segurança.");
+                        loginLocalFallback("Administrador Servnac", email, "admin");
+                    }
+                } else {
+                    loginLocalFallback("Administrador Servnac", email, "admin");
+                }
+                return;
+            }
+
+            // Tentativa de login online para outras contas via Email / Senha
+            if (isFirebaseOnline) {
+                try {
+                    await firebase.auth().signInWithEmailAndPassword(email, password);
+                } catch (err) {
+                    errorMsg.innerText = "E-mail ou senha incorretos.";
+                    errorBox.classList.remove('hidden');
+                }
+            } else {
+                errorMsg.innerText = "Sem conexão com o banco de dados para validar este usuário.";
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        // GOOGLE SIGN IN
+        async function handleGoogleLogin() {
+            const errorBox = document.getElementById('login-error-box');
+            const errorMsg = document.getElementById('login-error-msg');
+            errorBox.classList.add('hidden');
+
+            if (isFirebaseOnline) {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (err) {
+                    errorMsg.innerText = "Autenticação cancelada ou rejeitada.";
+                    errorBox.classList.remove('hidden');
+                }
+            } else {
+                // Mock Google login for offline demo
+                loginLocalFallback("Operador Teste (Google)", "operador@servnac.com.br", "operator");
+            }
+        }
+
+        // HELPER FOR LOCAL LOGIN
+        function loginLocalFallback(name, email, role) {
+            const session = { name, email, role };
+            localStorage.setItem('servnac_logged_user', JSON.stringify(session));
+            enterApplication(name, email, role);
+        }
+
+        // ENTER APPLICATION AND CONFIGURE ENVIRONMENT
+        function enterApplication(name, email, role) {
+            userRole = role;
+            
+            // Set User profile interface
+            document.getElementById('user-name-label').innerText = name;
+            document.getElementById('user-avatar-initials').innerText = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            
+            const roleBadge = document.getElementById('user-role-badge');
+            if (role === 'admin') {
+                roleBadge.innerText = 'Administrador';
+                roleBadge.className = "text-[9px] font-extrabold uppercase bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-700";
+                
+                // Mostrar áreas restritas
+                document.getElementById('colab-import-container').classList.remove('hidden');
+                document.getElementById('colab-restricted-msg').classList.add('hidden');
+                document.getElementById('posto-import-container').classList.remove('hidden');
+                document.getElementById('posto-restricted-msg').classList.add('hidden');
+            } else {
+                roleBadge.innerText = 'Operador';
+                roleBadge.className = "text-[9px] font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 rounded text-slate-500";
+                
+                // Ocultar e bloquear áreas restritas
+                document.getElementById('colab-import-container').classList.add('hidden');
+                document.getElementById('colab-restricted-msg').classList.remove('hidden');
+                document.getElementById('posto-import-container').classList.add('hidden');
+                document.getElementById('posto-restricted-msg').classList.remove('hidden');
+            }
+
+            // Hide login screen, show application
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app-container').classList.remove('hidden');
+
+            // Render components
+            initMotivesChart();
+            loadSampleDataIfNeeded();
+            syncDashboardStats();
+            updateFormSelects();
+            showNotification(`Bem-vindo de volta, ${name.split(' ')[0]}!`, "success");
+        }
+
+        // EXIT APPLICATION & LOGOUT
+        async function handleLogout() {
+            if (isFirebaseOnline && firebase) {
+                try {
+                    await firebase.auth().signOut();
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            localStorage.removeItem('servnac_logged_user');
+            exitApplication();
+        }
+
+        function exitApplication() {
+            document.getElementById('main-app-container').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-form').reset();
         }
 
         // Listen for updates from Firebase Firestore
@@ -1028,6 +1265,10 @@
 
         // EXCEL IMPORT FOR COLABORADORES
         function handleImportColabExcel(event) {
+            if (userRole !== 'admin') {
+                showNotification("Operação restrita para administradores.", "error");
+                return;
+            }
             const file = event.target.files[0];
             if (!file) return;
 
@@ -1129,6 +1370,10 @@
 
         // EXCEL IMPORT FOR POSTOS
         function handleImportPostoExcel(event) {
+            if (userRole !== 'admin') {
+                showNotification("Operação restrita para administradores.", "error");
+                return;
+            }
             const file = event.target.files[0];
             if (!file) return;
 
@@ -1283,13 +1528,13 @@
             endDate.setHours(23,59,59,999);
 
             if (period === 'today') {
-                // Already default today
+                // Default
             } else if (period === 'week') {
                 startDate.setDate(startDate.getDate() - 7);
             } else if (period === 'month') {
-                startDate.setDate(1); // Beginning of current month
+                startDate.setDate(1);
             } else if (period === 'year') {
-                startDate.setMonth(0, 1); // January 1st
+                startDate.setMonth(0, 1);
             } else if (period === 'custom') {
                 if (startInput) startDate = new Date(startInput + 'T00:00:00');
                 if (endInput) endDate = new Date(endInput + 'T23:59:59');
