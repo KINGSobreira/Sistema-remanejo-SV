@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/servnac.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="pt-BR" class="h-full bg-slate-50">
 <head>
@@ -5,32 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servnac - Controle de Remanejos e Substituições</title>
     
-    <!-- Google Fonts Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js for reports and dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- SheetJS (XLSX) for high-fidelity Excel parsing/generating -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Firebase SDK Imports (Compat Version for simple integration) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
 
-
     <script>
-        // Safely extending Tailwind configuration
         tailwind.config = {
             theme: {
                 extend: {
@@ -46,14 +37,14 @@
                             400: '#5ecb9b',
                             500: '#34b27d',
                             600: '#239364',
-                            700: '#1b4332', /* Forest Green Primary */
-                            800: '#112f24', /* Dark Sidebar Green */
-                            900: '#081c15', /* Deepest Green */
+                            700: '#1b4332',
+                            800: '#112f24',
+                            900: '#081c15',
                         },
                         accent: {
-                            DEFAULT: '#f1f5f9', /* Premium light slate gray */
-                            hover: '#e2e8f0',   /* Slate hover gray */
-                            dark: '#64748b'     /* Dark slate gray */
+                            DEFAULT: '#f1f5f9',
+                            hover: '#e2e8f0',
+                            dark: '#64748b'
                         }
                     }
                 }
@@ -62,51 +53,17 @@
     </script>
 
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom scrollbar style */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Print layout adjustments for high fidelity A4 PDF reports */
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background-color: white !important;
-                color: black !important;
-                font-size: 12px;
-                overflow: visible !important;
-            }
-            .print-container {
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                border: none !important;
-            }
-            table {
-                page-break-inside: auto;
-            }
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-            }
+            .no-print { display: none !important; }
+            body { background-color: white !important; color: black !important; font-size: 12px; overflow: visible !important; }
+            .print-container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; border: none !important; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
         }
     </style>
 </head>
@@ -115,7 +72,6 @@
     <!-- SIDEBAR NAVIGATION -->
     <aside class="no-print w-full md:w-64 bg-brand-800 text-white flex-shrink-0 flex flex-col justify-between shadow-2xl z-20">
         <div>
-            <!-- Sidebar Header -->
             <div class="p-6 border-b border-brand-700 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-brand-700 font-bold text-xl shadow-md">
@@ -126,13 +82,11 @@
                         <p class="text-[10px] text-brand-300 uppercase tracking-widest font-semibold">Substituições</p>
                     </div>
                 </div>
-                <!-- Mobile Menu Button -->
                 <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
             </div>
 
-            <!-- Navigation Links -->
             <nav id="sidebar-nav" class="hidden md:block p-4 space-y-1">
                 <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-brand-700 text-white shadow-inner">
                     <i class="fa-solid fa-chart-pie w-5 text-center"></i>
@@ -157,7 +111,6 @@
             </nav>
         </div>
 
-        <!-- Connection / Footer status info -->
         <div class="hidden md:block p-4 border-t border-brand-700 bg-brand-900 bg-opacity-40">
             <div class="flex items-center space-x-3 text-xs text-brand-300">
                 <span class="relative flex h-2 w-2">
@@ -173,7 +126,6 @@
     <!-- MAIN WORKSPACE -->
     <main class="flex-1 flex flex-col overflow-hidden">
         
-        <!-- HEADER BAR (Desktop & Mobile header placeholder) -->
         <header class="no-print bg-white border-b border-slate-200 h-16 flex-shrink-0 flex items-center justify-between px-6 shadow-sm">
             <div class="flex items-center space-x-4">
                 <button onclick="toggleMobileMenu()" class="md:hidden text-slate-600 focus:outline-none">
@@ -182,11 +134,9 @@
                 <h2 id="page-title" class="text-lg font-bold text-slate-800">Painel de Controle</h2>
             </div>
             <div class="flex items-center space-x-4">
-                <!-- Quick Date indicator -->
                 <span id="current-date-badge" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg shadow-inner">
                     <i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> Carregando...
                 </span>
-                <!-- Connection Setting Button -->
                 <button onclick="openConfigModal()" title="Configurações de Conexão Firebase" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition">
                     <i class="fa-solid fa-circle-nodes text-lg"></i>
                 </button>
@@ -200,12 +150,10 @@
             </div>
         </header>
 
-        <!-- VIEWPORT CONTENT AREA -->
         <div class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50">
 
             <!-- TAB 1: DASHBOARD -->
             <section id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Counter Stat Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div>
@@ -217,7 +165,6 @@
                             <i class="fa-solid fa-arrows-spin"></i>
                         </div>
                     </div>
-
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total de Colaboradores</p>
@@ -228,7 +175,6 @@
                             <i class="fa-solid fa-users"></i>
                         </div>
                     </div>
-
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Postos Ativos</p>
@@ -239,7 +185,6 @@
                             <i class="fa-solid fa-building-shield"></i>
                         </div>
                     </div>
-
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Substituições</p>
@@ -252,9 +197,7 @@
                     </div>
                 </div>
 
-                <!-- Graphs and Activities Area -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Graph widget -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
                         <div>
                             <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Motivos das Ocorrências</h4>
@@ -264,14 +207,10 @@
                             <canvas id="motivesChart"></canvas>
                         </div>
                     </div>
-
-                    <!-- Recent Actions Panel -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[380px]">
                         <h4 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Últimos Remanejos</h4>
                         <p class="text-xs text-slate-400 mb-4">Atualizações efetuadas recentemente</p>
-                        
                         <div id="dashboard-recent-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                            <!-- Injected dynamically -->
                             <p class="text-slate-400 text-xs text-center py-8">Nenhum remanejo registrado hoje.</p>
                         </div>
                     </div>
@@ -285,19 +224,14 @@
                         <h3 class="font-bold text-base tracking-wide uppercase">Lançar Nova Substituição / Remanejo</h3>
                         <p class="text-xs text-brand-200">Efetue a escala de cobertura para manter a operação em andamento</p>
                     </div>
-
                     <form id="remanejo-form" onsubmit="handleCreateRemanejo(event)" class="p-6 space-y-6">
-                        <!-- Posto de Serviço selection -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">1. Posto de Serviço Onde Ocorrerá a Troca *</label>
                             <select id="remanejo-posto" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
                                 <option value="">Selecione o posto...</option>
                             </select>
                         </div>
-
-                        <!-- Side by side Employees -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Outgoing Colaborador -->
                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                                     <i class="fa-solid fa-user-minus text-red-500 mr-1"></i> Colaborador Cedente (Saindo) *
@@ -307,8 +241,6 @@
                                 </select>
                                 <p class="text-[11px] text-slate-400 mt-1">Profissional titular da escala que necessita ausentar-se.</p>
                             </div>
-
-                            <!-- Incoming Colaborador -->
                             <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                                     <i class="fa-solid fa-user-plus text-brand-600 mr-1"></i> Colaborador Substituto (Entrando) *
@@ -319,8 +251,6 @@
                                 <p class="text-[11px] text-slate-400 mt-1">Profissional responsável por assumir o posto de cobertura.</p>
                             </div>
                         </div>
-
-                        <!-- Date and Justifications -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Data do Remanejo *</label>
@@ -348,14 +278,10 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Detailed details -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Observações Adicionais / Histórico</label>
                             <textarea id="remanejo-obs" rows="3" placeholder="Insira detalhes adicionais sobre o remanejamento ou autorizações especiais..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white"></textarea>
                         </div>
-
-                        <!-- Action footer buttons -->
                         <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
                             <button type="button" onclick="resetForm('remanejo-form')" class="px-5 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
                                 Limpar
@@ -371,10 +297,8 @@
 
             <!-- TAB 3: RELATÓRIOS & EXPORTAÇÃO -->
             <section id="tab-relatorios" class="tab-content hidden space-y-6">
-                <!-- Advanced Query Engine Card -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm no-print">
                     <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-4">Mapeador de Filtros de Relatórios</h3>
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Filtro de Período</label>
@@ -386,7 +310,6 @@
                                 <option value="custom">Período Customizado</option>
                             </select>
                         </div>
-                        
                         <div id="custom-dates-range" class="hidden sm:col-span-2 grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">De</label>
@@ -397,20 +320,17 @@
                                 <input type="date" id="report-end" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5">Posto de Serviço</label>
                             <select id="report-posto" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
                                 <option value="all">Todos os postos</option>
                             </select>
                         </div>
-
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1.5 font-sans">Colaborador (Pesquisa)</label>
                             <input type="text" id="report-colab" placeholder="Ex: João, Maria..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
                         </div>
                     </div>
-
                     <div class="flex justify-end space-x-2 mt-4 pt-4 border-t border-slate-100">
                         <button onclick="applyReportFilters()" class="px-4 py-2 text-xs font-bold rounded-lg bg-brand-700 hover:bg-brand-800 text-white transition flex items-center space-x-1.5">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -427,9 +347,7 @@
                     </div>
                 </div>
 
-                <!-- Printable Report Output Content -->
                 <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm print-container">
-                    <!-- Letter Header (visible on print) -->
                     <div class="border-b-2 border-brand-700 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                         <div>
                             <h2 class="text-xl font-extrabold text-slate-800 tracking-wide">RELATÓRIO DE REMANEJOS & SUBSTITUIÇÕES</h2>
@@ -441,8 +359,6 @@
                             <p class="text-[10px] text-slate-400" id="report-print-date">Emitido em: --/--/----</p>
                         </div>
                     </div>
-
-                    <!-- Dynamic Report Summary Box -->
                     <div class="grid grid-cols-3 gap-4 mb-6 text-center">
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
                             <span class="block text-xs font-medium text-slate-400 uppercase">Total Selecionado</span>
@@ -457,8 +373,6 @@
                             <span id="report-summary-motivo" class="text-xs font-bold text-emerald-800 uppercase leading-5">N/A</span>
                         </div>
                     </div>
-
-                    <!-- Report Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -472,15 +386,12 @@
                                 </tr>
                             </thead>
                             <tbody id="report-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
-                                <!-- Dynamically populated -->
                                 <tr>
                                     <td colspan="6" class="p-8 text-center text-slate-400 font-sans">Use os filtros acima e clique em "Gerar Relatório" para ver os dados.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Standard Document Signature line (only displayed during prints) -->
                     <div class="hidden print:block mt-16 pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 text-center">
                         <div>
                             <div class="border-b border-slate-400 mx-auto w-48 h-8"></div>
@@ -496,14 +407,10 @@
 
             <!-- TAB 4: COLABORADORES -->
             <section id="tab-colaboradores" class="tab-content hidden space-y-6">
-                <!-- Grid: Form + XLS Importer -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Insert Form -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
                         <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Colaborador</h3>
                         <p class="text-xs text-slate-400 mb-4">Adicione manualmente um novo vigia / segurança</p>
-
                         <form id="colab-form" onsubmit="handleCreateColab(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome Completo *</label>
@@ -530,13 +437,10 @@
                         </form>
                     </div>
 
-                    <!-- Excel/CSV Importer Area -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Importação em Lote via Excel (SheetJS)</h3>
                             <p class="text-xs text-slate-400 mb-4">Atualize ou insira centenas de colaboradores de uma só vez arrastando sua planilha</p>
-
-                            <!-- Drag & Drop Zone -->
                             <div id="drop-zone" ondragover="event.preventDefault()" ondrop="handleFileDrop(event)" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-brand-500 transition cursor-pointer bg-slate-50 relative group">
                                 <input type="file" id="file-input" onchange="handleFileSelect(event)" accept=".xlsx, .xls, .csv" class="absolute inset-0 opacity-0 cursor-pointer">
                                 <div class="space-y-3">
@@ -551,8 +455,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Progress Bar / Statistics -->
                         <div id="import-stats" class="hidden mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-100 flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="text-xl text-emerald-600"><i class="fa-solid fa-circle-check"></i></div>
@@ -566,7 +468,6 @@
                     </div>
                 </div>
 
-                <!-- Colaboradores List Table Card -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                         <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Relação de Colaboradores Cadastrados</h3>
@@ -577,7 +478,6 @@
                             <input type="text" id="colab-search" oninput="filterColabTable()" placeholder="Buscar colaborador..." class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
                         </div>
                     </div>
-                    
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -588,9 +488,7 @@
                                     <th class="p-3 text-right">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="colab-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
-                                <!-- Populated dynamically -->
-                            </tbody>
+                            <tbody id="colab-table-body" class="text-slate-700 text-xs divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -599,11 +497,9 @@
             <!-- TAB 5: POSTOS DE SERVIÇO -->
             <section id="tab-postos" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Insert Form -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
                         <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-1">Cadastrar Posto</h3>
                         <p class="text-xs text-slate-400 mb-4">Crie um novo local de escala operacional</p>
-
                         <form id="posto-form" onsubmit="handleCreatePosto(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nome do Posto *</label>
@@ -620,10 +516,15 @@
                         </form>
                     </div>
 
-                    <!-- Postos List -->
+                    <!-- ✅ POSTOS LIST com botão Exportar Excel -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
-                        <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase mb-4">Postos Ativos Monitorados</h3>
-                        
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm tracking-wide uppercase">Postos Ativos Monitorados</h3>
+                            <button onclick="exportPostosToExcel()" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>Exportar Excel</span>
+                            </button>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -634,9 +535,7 @@
                                         <th class="p-3 text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody id="posto-table-body" class="text-slate-700 text-xs divide-y divide-slate-100">
-                                    <!-- Populated dynamically -->
-                                </tbody>
+                                <tbody id="posto-table-body" class="text-slate-700 text-xs divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
                     </div>
@@ -646,7 +545,7 @@
         </div>
     </main>
 
-    <!-- CUSTOM CONFIRMATION MODAL -->
+    <!-- CONFIRMATION MODAL -->
     <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900 bg-opacity-60 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 transition-all">
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl mx-auto mb-4">
@@ -661,10 +560,10 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
+    <!-- TOAST CONTAINER -->
     <div id="toast-container" class="no-print fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
 
-    <!-- CONFIGURATION FIREBASE CONNECTION MODAL -->
+    <!-- FIREBASE CONFIG MODAL -->
     <div id="config-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900 bg-opacity-60 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden transform scale-95 transition-all">
             <div class="bg-brand-800 p-4 text-white flex justify-between items-center">
@@ -685,23 +584,17 @@
         </div>
     </div>
 
-    <!-- CORE SYSTEM LOGIC SCRIPT -->
     <script>
-        /* ================================================================= */
-        /* 🔥 COLE AQUI AS SUAS CONFIGURAÇÕES DO FIREBASE REAL 🔥            */
-        /* ================================================================= */
         const MINHAS_CREDENCIAIS_FIREBASE = {
-  apiKey: "AIzaSyCmpO69aJArkB4Hr-9V-QrXo1i87PfopFE",
-  authDomain: "remanejos-sv.firebaseapp.com",
-  projectId: "remanejos-sv",
-  storageBucket: "remanejos-sv.firebasestorage.app",
-  messagingSenderId: "467280826921",
-  appId: "1:467280826921:web:d7f706cb7ec3d26ea08238",
-  measurementId: "G-MRHY5NQQD1"
-};
-/*================================================================ */
+            apiKey: "AIzaSyCmpO69aJArkB4Hr-9V-QrXo1i87PfopFE",
+            authDomain: "remanejos-sv.firebaseapp.com",
+            projectId: "remanejos-sv",
+            storageBucket: "remanejos-sv.firebasestorage.app",
+            messagingSenderId: "467280826921",
+            appId: "1:467280826921:web:d7f706cb7ec3d26ea08238",
+            measurementId: "G-MRHY5NQQD1"
+        };
 
-        // In-Memory Database for offline fallback
         let localDB = {
             colaboradores: [
                 { id: "c1", re: "1020", nome: "MARCOS ALBERTO DA SILVA", cargo: "Vigilante" },
@@ -719,158 +612,108 @@
             remanejos: []
         };
 
-        // Firebase Service Instances
         let isFirebaseActive = false;
         let db = null;
         let auth = null;
         let appId = "default-remanejos-app";
-
-        // Global State Variables
         let activeTab = "tab-dashboard";
         let motivesChartInstance = null;
         let unsubscribeColab = null;
         let unsubscribePosto = null;
         let unsubscribeRemanejo = null;
-
-        // Custom Confirmation State
         let confirmPromiseResolver = null;
 
         window.onload = function() {
-            // Set current date in badge
             const now = new Date();
             document.getElementById('current-date-badge').innerHTML = `<i class="fa-solid fa-calendar-days mr-1 text-emerald-600"></i> ${now.toLocaleDateString('pt-BR')}`;
             document.getElementById('report-print-date').innerText = `Emitido em: ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
-            
-            // Set input date default to today
             const todayStr = now.toISOString().split('T')[0];
             document.getElementById('remanejo-data').value = todayStr;
             document.getElementById('report-start').value = todayStr;
             document.getElementById('report-end').value = todayStr;
-
             initFirebase();
             switchTab('tab-dashboard');
         };
 
-        // Initialize Firebase connection with Offline Contingency
         async function initFirebase() {
             const connText = document.getElementById('conn-text');
             const connPing = document.getElementById('conn-ping');
             const connDot = document.getElementById('conn-dot');
-
             try {
-                // Try reading stored configuration or use hardcoded values
                 let config = null;
                 const storedConfig = localStorage.getItem("firebase_remanejos_config");
-                
                 if (storedConfig) {
                     config = JSON.parse(storedConfig);
                 } else if (MINHAS_CREDENCIAIS_FIREBASE && MINHAS_CREDENCIAIS_FIREBASE.apiKey !== "") {
                     config = MINHAS_CREDENCIAIS_FIREBASE;
                 }
-
-                if (!config) {
-                    throw new Error("Configuração Firebase não encontrada.");
+                if (!config) throw new Error("Configuração Firebase não encontrada.");
+                let firebaseApp;
+                if (!firebase.apps.length) {
+                    firebaseApp = firebase.initializeApp(config);
+                } else {
+                    firebaseApp = firebase.app();
                 }
-
-            // Initialize Firebase App
-            let firebaseApp;
-            if (!firebase.apps.length) {
-                firebaseApp = firebase.initializeApp(config);
-            
-            } else {
-                firebaseApp = firebase.app(); // Get the existing app instance
-            }
-
-            // Initialize Analytics
-            if (config.measurementId) { // Only initialize if measurementId is present
-                firebase.analytics(firebaseApp);
-            }
-
-                
+                if (config.measurementId) {
+                    firebase.analytics(firebaseApp);
+                }
                 db = firebase.firestore();
                 auth = firebase.auth();
-
-                // Authenticate Anonymously
                 await auth.signInAnonymously();
-
                 isFirebaseActive = true;
                 connText.innerText = "Banco de Dados Conectado (Nuvem)";
                 connPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
                 connDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
-                
                 showToast("Conectado ao Firebase com sucesso!", "success");
-
-                // Start Firestore Sinking
                 startRealtimeListeners();
-
             } catch (err) {
-                console.warn("Firebase offline or misconfigured, fallback to LocalStorage Mode:", err);
+                console.warn("Firebase offline ou mal configurado:", err);
                 isFirebaseActive = false;
                 connText.innerText = "Modo Local Offline (Seguro)";
                 connPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
                 connDot.className = "relative inline-flex rounded-full h-2 w-2 bg-amber-500";
-                
-                // Load Offline Database
                 const offlineData = localStorage.getItem("servnac_offline_db");
                 if (offlineData) {
                     localDB = JSON.parse(offlineData);
                 } else {
                     saveLocalDBToStorage();
                 }
-
                 showToast("Sistema iniciado no modo local (offline).", "warning");
                 renderAllComponents();
             }
         }
 
-        // Setup real-time listeners for Firestore
         function startRealtimeListeners() {
             if (unsubscribeColab) unsubscribeColab();
             if (unsubscribePosto) unsubscribePosto();
             if (unsubscribeRemanejo) unsubscribeRemanejo();
 
-            // Sinking Colaboradores
             unsubscribeColab = db.collection('artifacts').doc(appId).collection('colaboradores')
                 .onSnapshot(snapshot => {
                     localDB.colaboradores = [];
-                    snapshot.forEach(doc => {
-                        localDB.colaboradores.push({ id: doc.id, ...doc.data() });
-                    });
+                    snapshot.forEach(doc => { localDB.colaboradores.push({ id: doc.id, ...doc.data() }); });
                     renderColaboradores();
                     updateSelectPickers();
-                }, err => {
-                    showToast("Erro ao carregar colaboradores do servidor.", "error");
-                });
+                }, err => { showToast("Erro ao carregar colaboradores.", "error"); });
 
-            // Sinking Postos
             unsubscribePosto = db.collection('artifacts').doc(appId).collection('postos')
                 .onSnapshot(snapshot => {
                     localDB.postos = [];
-                    snapshot.forEach(doc => {
-                        localDB.postos.push({ id: doc.id, ...doc.data() });
-                    });
+                    snapshot.forEach(doc => { localDB.postos.push({ id: doc.id, ...doc.data() }); });
                     renderPostos();
                     updateSelectPickers();
-                }, err => {
-                    showToast("Erro ao carregar postos do servidor.", "error");
-                });
+                }, err => { showToast("Erro ao carregar postos.", "error"); });
 
-            // Sinking Remanejos
             unsubscribeRemanejo = db.collection('artifacts').doc(appId).collection('remanejos')
                 .onSnapshot(snapshot => {
                     localDB.remanejos = [];
-                    snapshot.forEach(doc => {
-                        localDB.remanejos.push({ id: doc.id, ...doc.data() });
-                    });
+                    snapshot.forEach(doc => { localDB.remanejos.push({ id: doc.id, ...doc.data() }); });
                     renderDashboardStats();
                     renderRecentRemanejos();
-                    applyReportFilters(); // Refresh current report view
-                }, err => {
-                    showToast("Erro ao carregar remanejos do servidor.", "error");
-                });
+                    applyReportFilters();
+                }, err => { showToast("Erro ao carregar remanejos.", "error"); });
         }
 
-        // Local Storage sync helper
         function saveLocalDBToStorage() {
             localStorage.setItem("servnac_offline_db", JSON.stringify(localDB));
         }
@@ -884,15 +727,10 @@
             applyReportFilters();
         }
 
-        // Switch application navigation tabs
         function switchTab(tabId) {
             activeTab = tabId;
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-
-            // Header management
             const pageTitles = {
                 'tab-dashboard': 'Painel de Controle',
                 'tab-novo-remanejo': 'Lançar Novo Remanejo',
@@ -901,98 +739,51 @@
                 'tab-postos': 'Gerenciamento de Postos de Serviço'
             };
             document.getElementById('page-title').innerText = pageTitles[tabId] || 'Servnac';
-
-            // Sidebar Button states
             document.querySelectorAll('.sidebar-btn').forEach(btn => {
                 btn.className = "sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-brand-200 hover:bg-brand-700 hover:text-white";
             });
-            
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if (activeBtn) {
                 activeBtn.className = "sidebar-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-brand-700 text-white shadow-inner";
             }
-
-            // Collapse mobile menu upon selection
             document.getElementById('sidebar-nav').classList.add('hidden');
             document.getElementById('sidebar-nav').classList.add('md:block');
-
-            // Force Chart.js trigger render when visiting dashboard
-            if (tabId === 'tab-dashboard') {
-                setTimeout(renderMotivesChart, 100);
-            }
+            if (tabId === 'tab-dashboard') setTimeout(renderMotivesChart, 100);
         }
 
         function toggleMobileMenu() {
             const nav = document.getElementById('sidebar-nav');
-            if (nav.classList.contains('hidden')) {
-                nav.classList.remove('hidden');
-            } else {
-                nav.classList.add('hidden');
-            }
+            nav.classList.contains('hidden') ? nav.classList.remove('hidden') : nav.classList.add('hidden');
         }
 
-        // Helper to trigger custom Confirm Modal (Avoid browser alerts)
         function triggerConfirm(title, message) {
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-message').innerText = message;
             document.getElementById('confirm-modal').classList.remove('hidden');
-            
-            return new Promise((resolve) => {
-                confirmPromiseResolver = resolve;
-            });
+            return new Promise((resolve) => { confirmPromiseResolver = resolve; });
         }
 
-        // Close Confirm Modal action
         document.getElementById('confirm-cancel-btn').onclick = function() {
             document.getElementById('confirm-modal').classList.add('hidden');
             if (confirmPromiseResolver) confirmPromiseResolver(false);
         };
-
         document.getElementById('confirm-action-btn').onclick = function() {
             document.getElementById('confirm-modal').classList.add('hidden');
             if (confirmPromiseResolver) confirmPromiseResolver(true);
         };
 
-        // Toast Messages engine
         function showToast(message, type = "success") {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
-            const styles = {
-                success: "bg-emerald-600 text-white",
-                error: "bg-red-600 text-white",
-                warning: "bg-amber-500 text-slate-950",
-                info: "bg-slate-850 text-white"
-            };
-
-            const icons = {
-                success: "fa-solid fa-circle-check",
-                error: "fa-solid fa-triangle-exclamation",
-                warning: "fa-solid fa-circle-info",
-                info: "fa-solid fa-bell"
-            };
-
+            const styles = { success: "bg-emerald-600 text-white", error: "bg-red-600 text-white", warning: "bg-amber-500 text-slate-950", info: "bg-slate-850 text-white" };
+            const icons = { success: "fa-solid fa-circle-check", error: "fa-solid fa-triangle-exclamation", warning: "fa-solid fa-circle-info", info: "fa-solid fa-bell" };
             toast.className = `p-4 rounded-xl shadow-xl flex items-center space-x-3 max-w-sm transform translate-y-4 opacity-0 transition-all duration-350 pointer-events-auto ${styles[type] || styles.success}`;
-            toast.innerHTML = `
-                <i class="${icons[type] || icons.success} text-lg"></i>
-                <span class="text-xs font-bold leading-none">${message}</span>
-            `;
-
+            toast.innerHTML = `<i class="${icons[type] || icons.success} text-lg"></i><span class="text-xs font-bold leading-none">${message}</span>`;
             container.appendChild(toast);
-            
-            // Trigger animation
-            setTimeout(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            }, 10);
-
-            // Close automatically
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-                setTimeout(() => toast.remove(), 350);
-            }, 3000);
+            setTimeout(() => { toast.classList.remove('translate-y-4', 'opacity-0'); }, 10);
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-4'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
 
-        // Form Clean helper
         function resetForm(formId) {
             document.getElementById(formId).reset();
             if (formId === 'remanejo-form') {
@@ -1000,30 +791,16 @@
             }
         }
 
-        /* ================================================================= */
-        /* DATA MANAGEMENT ACTIONS (CRUD)                                    */
-        /* ================================================================= */
-
-        // Create new Colaborador
         async function handleCreateColab(event) {
             event.preventDefault();
-            const nomeInput = document.getElementById('colab-nome');
-            const reInput = document.getElementById('colab-re');
-            const cargoInput = document.getElementById('colab-cargo');
-
             const newColab = {
-                nome: nomeInput.value.trim().toUpperCase(),
-                re: reInput.value.trim() || "N/A",
-                cargo: cargoInput.value
+                nome: document.getElementById('colab-nome').value.trim().toUpperCase(),
+                re: document.getElementById('colab-re').value.trim() || "N/A",
+                cargo: document.getElementById('colab-cargo').value
             };
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('colaboradores').add(newColab);
-                    showToast("Colaborador cadastrado em nuvem!", "success");
-                } catch (err) {
-                    showToast("Falha ao salvar no Firebase.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('colaboradores').add(newColab); showToast("Colaborador cadastrado em nuvem!", "success"); }
+                catch (err) { showToast("Falha ao salvar no Firebase.", "error"); }
             } else {
                 newColab.id = "colab_" + Date.now();
                 localDB.colaboradores.unshift(newColab);
@@ -1031,22 +808,15 @@
                 showToast("Colaborador cadastrado localmente!", "success");
                 renderAllComponents();
             }
-
             resetForm('colab-form');
         }
 
-        // Delete Colaborador
         async function deleteColaborador(id) {
             const confirmed = await triggerConfirm("Excluir Colaborador", "Deseja realmente excluir este colaborador do quadro?");
             if (!confirmed) return;
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('colaboradores').doc(id).delete();
-                    showToast("Colaborador deletado com sucesso!", "success");
-                } catch (err) {
-                    showToast("Erro ao deletar no Firebase.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('colaboradores').doc(id).delete(); showToast("Colaborador deletado!", "success"); }
+                catch (err) { showToast("Erro ao deletar no Firebase.", "error"); }
             } else {
                 localDB.colaboradores = localDB.colaboradores.filter(c => c.id !== id);
                 saveLocalDBToStorage();
@@ -1055,47 +825,31 @@
             }
         }
 
-        // Create New Posto
         async function handleCreatePosto(event) {
             event.preventDefault();
-            const nomeInput = document.getElementById('posto-nome');
-            const endInput = document.getElementById('posto-endereco');
-
             const newPosto = {
-                nome: nomeInput.value.trim().toUpperCase(),
-                endereco: endInput.value.trim() || "Fortaleza - CE"
+                nome: document.getElementById('posto-nome').value.trim().toUpperCase(),
+                endereco: document.getElementById('posto-endereco').value.trim() || "Fortaleza - CE"
             };
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('postos').add(newPosto);
-                    showToast("Posto de Serviço salvo em nuvem!", "success");
-                } catch (err) {
-                    showToast("Erro ao cadastrar posto no Firebase.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('postos').add(newPosto); showToast("Posto salvo em nuvem!", "success"); }
+                catch (err) { showToast("Erro ao cadastrar posto.", "error"); }
             } else {
                 newPosto.id = "posto_" + Date.now();
                 localDB.postos.unshift(newPosto);
                 saveLocalDBToStorage();
-                showToast("Posto de Serviço salvo localmente!", "success");
+                showToast("Posto salvo localmente!", "success");
                 renderAllComponents();
             }
-
             resetForm('posto-form');
         }
 
-        // Delete Posto
         async function deletePosto(id) {
             const confirmed = await triggerConfirm("Excluir Posto", "Deseja excluir permanentemente este posto de serviço?");
             if (!confirmed) return;
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('postos').doc(id).delete();
-                    showToast("Posto excluído com sucesso!", "success");
-                } catch (err) {
-                    showToast("Erro ao deletar posto no Firebase.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('postos').doc(id).delete(); showToast("Posto excluído!", "success"); }
+                catch (err) { showToast("Erro ao deletar posto.", "error"); }
             } else {
                 localDB.postos = localDB.postos.filter(p => p.id !== id);
                 saveLocalDBToStorage();
@@ -1104,40 +858,24 @@
             }
         }
 
-        // Create New Remanejo
         async function handleCreateRemanejo(event) {
             event.preventDefault();
-            const postoVal = document.getElementById('remanejo-posto').value;
             const saindoVal = document.getElementById('remanejo-saindo').value;
             const entrandoVal = document.getElementById('remanejo-entrando').value;
-            const dataVal = document.getElementById('remanejo-data').value;
-            const turnoVal = document.getElementById('remanejo-turno').value;
-            const motivoVal = document.getElementById('remanejo-motivo').value;
-            const obsVal = document.getElementById('remanejo-obs').value.trim();
-
-            if (saindoVal === entrandoVal) {
-                showToast("O colaborador cedente não pode ser igual ao substituto!", "error");
-                return;
-            }
-
+            if (saindoVal === entrandoVal) { showToast("O cedente não pode ser igual ao substituto!", "error"); return; }
             const newRemanejo = {
-                posto: postoVal,
+                posto: document.getElementById('remanejo-posto').value,
                 saindo: saindoVal,
                 entrando: entrandoVal,
-                data: dataVal,
-                turno: turnoVal,
-                motivo: motivoVal,
-                observacoes: obsVal || "Nenhuma observação informada.",
+                data: document.getElementById('remanejo-data').value,
+                turno: document.getElementById('remanejo-turno').value,
+                motivo: document.getElementById('remanejo-motivo').value,
+                observacoes: document.getElementById('remanejo-obs').value.trim() || "Nenhuma observação informada.",
                 criadoEm: new Date().toISOString()
             };
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('remanejos').add(newRemanejo);
-                    showToast("Remanejo de cobertura registrado!", "success");
-                } catch (err) {
-                    showToast("Erro ao salvar remanejo no banco.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('remanejos').add(newRemanejo); showToast("Remanejo registrado!", "success"); }
+                catch (err) { showToast("Erro ao salvar remanejo.", "error"); }
             } else {
                 newRemanejo.id = "remanejo_" + Date.now();
                 localDB.remanejos.unshift(newRemanejo);
@@ -1145,23 +883,16 @@
                 showToast("Remanejo registrado localmente!", "success");
                 renderAllComponents();
             }
-
             resetForm('remanejo-form');
             switchTab('tab-dashboard');
         }
 
-        // Delete Remanejo
         async function deleteRemanejo(id) {
             const confirmed = await triggerConfirm("Remover Remanejo", "Deseja estornar ou deletar este registro de substituição?");
             if (!confirmed) return;
-
             if (isFirebaseActive) {
-                try {
-                    await db.collection('artifacts').doc(appId).collection('remanejos').doc(id).delete();
-                    showToast("Troca excluída com sucesso!", "success");
-                } catch (err) {
-                    showToast("Erro ao deletar no Firestore.", "error");
-                }
+                try { await db.collection('artifacts').doc(appId).collection('remanejos').doc(id).delete(); showToast("Troca excluída!", "success"); }
+                catch (err) { showToast("Erro ao deletar no Firestore.", "error"); }
             } else {
                 localDB.remanejos = localDB.remanejos.filter(r => r.id !== id);
                 saveLocalDBToStorage();
@@ -1170,20 +901,13 @@
             }
         }
 
-        /* ================================================================= */
-        /* SHEETJS (EXCEL IMPORT ENGINE)                                     */
-        /* ================================================================= */
-
-        // Handle Excel drop zone
         function handleFileDrop(e) {
             e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length) processExcelFile(files[0]);
+            if (e.dataTransfer.files.length) processExcelFile(e.dataTransfer.files[0]);
         }
 
         function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length) processExcelFile(files[0]);
+            if (e.target.files.length) processExcelFile(e.target.files[0]);
         }
 
         function processExcelFile(file) {
@@ -1192,31 +916,18 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[firstSheetName];
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(sheet);
-
-                    if (!json || json.length === 0) {
-                        showToast("Planilha vazia ou ilegível.", "error");
-                        return;
-                    }
-
+                    if (!json || json.length === 0) { showToast("Planilha vazia ou ilegível.", "error"); return; }
                     let importCount = 0;
-                    
-                    // Normalize and check columns
                     json.forEach(async (row) => {
                         const rawNome = row.nome || row.Nome || row.NOME || row.colaborador || row.Colaborador;
-                        if (!rawNome) return; // skip row without names
-
-                        const rawRe = row.re || row.RE || row.Re || row.matricula || row.Matrícula || "N/A";
-                        const rawCargo = row.cargo || row.Cargo || row.CARGO || row.função || row.Função || "Vigilante";
-
+                        if (!rawNome) return;
                         const record = {
                             nome: String(rawNome).trim().toUpperCase(),
-                            re: String(rawRe).trim(),
-                            cargo: String(rawCargo).trim()
+                            re: String(row.re || row.RE || row.Re || row.matricula || "N/A").trim(),
+                            cargo: String(row.cargo || row.Cargo || row.CARGO || "Vigilante").trim()
                         };
-
                         if (isFirebaseActive) {
                             await db.collection('artifacts').doc(appId).collection('colaboradores').add(record);
                         } else {
@@ -1225,18 +936,10 @@
                         }
                         importCount++;
                     });
-
-                    if (!isFirebaseActive) {
-                        saveLocalDBToStorage();
-                        renderAllComponents();
-                    }
-
-                    // Display results
-                    const statsPanel = document.getElementById('import-stats');
+                    if (!isFirebaseActive) { saveLocalDBToStorage(); renderAllComponents(); }
                     document.getElementById('import-count-text').innerText = `${importCount} colaboradores foram cadastrados do Excel.`;
-                    statsPanel.classList.remove('hidden');
+                    document.getElementById('import-stats').classList.remove('hidden');
                     showToast("Planilha importada com sucesso!", "success");
-
                 } catch (err) {
                     console.error(err);
                     showToast("Erro crítico ao processar o Excel.", "error");
@@ -1245,98 +948,64 @@
             reader.readAsArrayBuffer(file);
         }
 
-        /* ================================================================= */
-        /* RENDER COMPONENT WRITERS                                          */
-        /* ================================================================= */
-
-        // Populate Pickers and select options
         function updateSelectPickers() {
             const postoSelects = [document.getElementById('remanejo-posto'), document.getElementById('report-posto')];
             const saindoSelect = document.getElementById('remanejo-saindo');
             const entrandoSelect = document.getElementById('remanejo-entrando');
-
-            // Sort arrays alphabetically for ease of operation
             const sortedPostos = [...localDB.postos].sort((a,b) => a.nome.localeCompare(b.nome));
             const sortedColabs = [...localDB.colaboradores].sort((a,b) => a.nome.localeCompare(b.nome));
-
-            // Clean & fill postos
             postoSelects.forEach((select, index) => {
                 if (!select) return;
                 const savedVal = select.value;
                 select.innerHTML = index === 0 ? '<option value="">Selecione o posto...</option>' : '<option value="all">Todos os postos</option>';
-                sortedPostos.forEach(p => {
-                    select.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
-                });
+                sortedPostos.forEach(p => { select.innerHTML += `<option value="${p.nome}">${p.nome}</option>`; });
                 select.value = savedVal;
             });
-
-            // Clean & fill saindo/entrando
             [saindoSelect, entrandoSelect].forEach(select => {
                 if (!select) return;
                 const savedVal = select.value;
                 select.innerHTML = '<option value="">Selecione o colaborador...</option>';
-                sortedColabs.forEach(c => {
-                    select.innerHTML += `<option value="${c.nome}">${c.nome} (RE: ${c.re})</option>`;
-                });
+                sortedColabs.forEach(c => { select.innerHTML += `<option value="${c.nome}">${c.nome} (RE: ${c.re})</option>`; });
                 select.value = savedVal;
             });
         }
 
-        // Render Colaboradores Admin list
         function renderColaboradores() {
             const body = document.getElementById('colab-table-body');
             body.innerHTML = '';
-
             if (localDB.colaboradores.length === 0) {
-                body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum colaborador cadastrado ainda. Use o formulário ou Excel.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum colaborador cadastrado ainda.</td></tr>`;
                 return;
             }
-
             localDB.colaboradores.forEach(c => {
                 body.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 font-mono font-semibold text-slate-600">${c.re}</td>
                         <td class="p-3 font-semibold text-slate-800">${c.nome}</td>
-                        <td class="p-3">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-100">
-                                ${c.cargo}
-                            </span>
-                        </td>
+                        <td class="p-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-100">${c.cargo}</span></td>
                         <td class="p-3 text-right">
                             <button onclick="deleteColaborador('${c.id}')" class="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded transition">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
-        // Search engine for Colaborador
         function filterColabTable() {
             const term = document.getElementById('colab-search').value.toLowerCase();
-            const rows = document.querySelectorAll('#colab-table-body tr');
-
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if (text.includes(term)) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
+            document.querySelectorAll('#colab-table-body tr').forEach(row => {
+                row.innerText.toLowerCase().includes(term) ? row.classList.remove('hidden') : row.classList.add('hidden');
             });
         }
 
-        // Render Postos List
         function renderPostos() {
             const body = document.getElementById('posto-table-body');
             body.innerHTML = '';
-
             if (localDB.postos.length === 0) {
                 body.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Nenhum posto de serviço registrado.</td></tr>`;
                 return;
             }
-
             localDB.postos.forEach(p => {
                 body.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
@@ -1348,165 +1017,89 @@
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
-        // Compute dashboard statistic values
         function renderDashboardStats() {
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            const countToday = localDB.remanejos.filter(r => r.data === todayStr).length;
-            const countColab = localDB.colaboradores.length;
-            const countPosto = localDB.postos.length;
-            const countTotal = localDB.remanejos.length;
-
-            document.getElementById('stat-today-remanejos').innerText = countToday;
-            document.getElementById('stat-total-colaboradores').innerText = countColab;
-            document.getElementById('stat-total-postos').innerText = countPosto;
-            document.getElementById('stat-total-substituicoes').innerText = countTotal;
+            document.getElementById('stat-today-remanejos').innerText = localDB.remanejos.filter(r => r.data === todayStr).length;
+            document.getElementById('stat-total-colaboradores').innerText = localDB.colaboradores.length;
+            document.getElementById('stat-total-postos').innerText = localDB.postos.length;
+            document.getElementById('stat-total-substituicoes').innerText = localDB.remanejos.length;
         }
 
-        // Render latest actions list
         function renderRecentRemanejos() {
             const list = document.getElementById('dashboard-recent-list');
             list.innerHTML = '';
-
             const todayStr = new Date().toISOString().split('T')[0];
             const activeToday = localDB.remanejos.filter(r => r.data === todayStr);
-
             if (activeToday.length === 0) {
-                list.innerHTML = `<div class="text-center py-12">
-                    <div class="text-slate-300 text-3xl mb-2"><i class="fa-solid fa-box-open"></i></div>
-                    <p class="text-slate-400 text-xs">Nenhum remanejo registrado hoje.</p>
-                </div>`;
+                list.innerHTML = `<div class="text-center py-12"><div class="text-slate-300 text-3xl mb-2"><i class="fa-solid fa-box-open"></i></div><p class="text-slate-400 text-xs">Nenhum remanejo registrado hoje.</p></div>`;
                 return;
             }
-
-            // Show latest 6 first
-            const displayList = [...activeToday].slice(0, 6);
-
-            displayList.forEach(r => {
+            [...activeToday].slice(0, 6).forEach(r => {
                 list.innerHTML += `
                     <div class="p-3.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-150 rounded-lg flex items-center justify-between transition">
                         <div class="space-y-1">
                             <h5 class="text-xs font-bold text-slate-700 truncate max-w-[180px]">${r.posto}</h5>
                             <p class="text-[10px] text-slate-500">
-                                <span class="text-red-500 font-semibold">${r.saindo.split(' ')[0]}</span> 
-                                <i class="fa-solid fa-arrow-right text-[8px] mx-1"></i> 
+                                <span class="text-red-500 font-semibold">${r.saindo.split(' ')[0]}</span>
+                                <i class="fa-solid fa-arrow-right text-[8px] mx-1"></i>
                                 <span class="text-emerald-600 font-semibold">${r.entrando.split(' ')[0]}</span>
                             </p>
                             <p class="text-[9px] text-slate-400"><i class="fa-solid fa-clock mr-0.5"></i> ${r.turno}</p>
                         </div>
-                        <span class="text-[10px] font-bold uppercase px-2 py-1 bg-brand-50 text-brand-800 rounded">
-                            ${r.motivo}
-                        </span>
-                    </div>
-                `;
+                        <span class="text-[10px] font-bold uppercase px-2 py-1 bg-brand-50 text-brand-800 rounded">${r.motivo}</span>
+                    </div>`;
             });
         }
 
-        // Analytical motives donut chart generator
         function renderMotivesChart() {
             const ctx = document.getElementById('motivesChart');
             if (!ctx) return;
-
-            // Group motives count
-            const dataCounts = {
-                'Falta': 0,
-                'Atestado': 0,
-                'Férias': 0,
-                'Folga': 0,
-                'Licença': 0,
-                'Reciclagem': 0,
-                'Outro': 0
-            };
-
+            const dataCounts = { 'Falta': 0, 'Atestado': 0, 'Férias': 0, 'Folga': 0, 'Licença': 0, 'Reciclagem': 0, 'Outro': 0 };
             localDB.remanejos.forEach(r => {
-                if (dataCounts[r.motivo] !== undefined) {
-                    dataCounts[r.motivo]++;
-                } else {
-                    dataCounts['Outro']++;
-                }
+                dataCounts[r.motivo] !== undefined ? dataCounts[r.motivo]++ : dataCounts['Outro']++;
             });
-
-            // Destroy previous chart to prevent overlaps
-            if (motivesChartInstance) {
-                motivesChartInstance.destroy();
-            }
-
-            // Beautiful Forest Green and Slate palette
+            if (motivesChartInstance) motivesChartInstance.destroy();
             const colors = ['#EF4444', '#1B4332', '#34B27D', '#64748B', '#94A3B8', '#5ECB9B', '#CBD5E1'];
-
             motivesChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(dataCounts),
-                    datasets: [{
-                        data: Object.values(dataCounts),
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        hoverOffset: 4
-                    }]
+                    datasets: [{ data: Object.values(dataCounts), backgroundColor: colors, borderWidth: 2, hoverOffset: 4 }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 10, family: 'Inter' },
-                                boxWidth: 12
-                            }
-                        }
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 10, family: 'Inter' }, boxWidth: 12 } } },
                     cutout: '65%'
                 }
             });
         }
 
-        /* ================================================================= */
-        /* REPORT GENERATION ENGINE & PRINT AND EXCEL                        */
-        /* ================================================================= */
-
-        // Auto Toggle Date Range based on presets selection
         function handlePeriodPreset() {
             const preset = document.getElementById('report-period').value;
-            const container = document.getElementById('custom-dates-range');
-            
-            if (preset === 'custom') {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
+            document.getElementById('custom-dates-range').classList.toggle('hidden', preset !== 'custom');
         }
 
-        // Apply advanced filters and calculate metrics
         function applyReportFilters() {
             const period = document.getElementById('report-period').value;
             const startVal = document.getElementById('report-start').value;
             const endVal = document.getElementById('report-end').value;
             const postoFilter = document.getElementById('report-posto').value;
             const colabSearch = document.getElementById('report-colab').value.toLowerCase().trim();
-
             const now = new Date();
-            let startDate = null;
-            let endDate = null;
-
-            // Determine time intervals
+            let startDate = null, endDate = null;
             if (period === 'today') {
                 const todayStr = now.toISOString().split('T')[0];
                 startDate = new Date(todayStr + "T00:00:00");
                 endDate = new Date(todayStr + "T23:59:59");
             } else if (period === 'week') {
-                const pastWeek = new Date();
-                pastWeek.setDate(now.getDate() - 7);
-                startDate = pastWeek;
-                endDate = now;
+                const pastWeek = new Date(); pastWeek.setDate(now.getDate() - 7);
+                startDate = pastWeek; endDate = now;
             } else if (period === 'month') {
-                // Beginning of current month
                 startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                 endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
             } else if (period === 'year') {
@@ -1516,70 +1109,32 @@
                 startDate = startVal ? new Date(startVal + "T00:00:00") : null;
                 endDate = endVal ? new Date(endVal + "T23:59:59") : null;
             }
-
-            // Filter Records
             const filtered = localDB.remanejos.filter(r => {
-                const rDate = new Date(r.data + "T12:00:00"); // Neutral mid-day time to avoid timezone issues
-
-                // Time Filter Check
+                const rDate = new Date(r.data + "T12:00:00");
                 if (startDate && rDate < startDate) return false;
                 if (endDate && rDate > endDate) return false;
-
-                // Posto Filter Check
                 if (postoFilter !== 'all' && r.posto !== postoFilter) return false;
-
-                // Colaborador Name Search Check (Cedente or Substituto)
-                if (colabSearch !== "") {
-                    const hitSaindo = r.saindo.toLowerCase().includes(colabSearch);
-                    const hitEntrando = r.entrando.toLowerCase().includes(colabSearch);
-                    if (!hitSaindo && !hitEntrando) return false;
-                }
-
+                if (colabSearch !== "" && !r.saindo.toLowerCase().includes(colabSearch) && !r.entrando.toLowerCase().includes(colabSearch)) return false;
                 return true;
             });
-
-            // Calculate Report Summaries
-            const totalSelected = filtered.length;
-            const uniquePostos = new Set(filtered.map(r => r.posto)).size;
-            
-            // Motive counter frequency finder
             const motiveCounts = {};
-            filtered.forEach(r => {
-                motiveCounts[r.motivo] = (motiveCounts[r.motivo] || 0) + 1;
-            });
-            let topMotive = "N/A";
-            let topCount = 0;
-            Object.entries(motiveCounts).forEach(([mot, cnt]) => {
-                if (cnt > topCount) {
-                    topCount = cnt;
-                    topMotive = mot;
-                }
-            });
-
-            // Write report stats indicators
-            document.getElementById('report-summary-total').innerText = totalSelected;
-            document.getElementById('report-summary-postos').innerText = uniquePostos;
+            filtered.forEach(r => { motiveCounts[r.motivo] = (motiveCounts[r.motivo] || 0) + 1; });
+            let topMotive = "N/A", topCount = 0;
+            Object.entries(motiveCounts).forEach(([mot, cnt]) => { if (cnt > topCount) { topCount = cnt; topMotive = mot; } });
+            document.getElementById('report-summary-total').innerText = filtered.length;
+            document.getElementById('report-summary-postos').innerText = new Set(filtered.map(r => r.posto)).size;
             document.getElementById('report-summary-motivo').innerText = topMotive;
-
-            // Generate label text
             let metaTxt = `Período: ${period.toUpperCase()}`;
             if (postoFilter !== 'all') metaTxt += ` | Posto: ${postoFilter}`;
             if (colabSearch !== '') metaTxt += ` | Filtro Nome: "${colabSearch.toUpperCase()}"`;
             document.getElementById('report-meta-text').innerText = metaTxt;
-
-            // Populate Report Table
             const body = document.getElementById('report-table-body');
             body.innerHTML = '';
-
             if (filtered.length === 0) {
-                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhum remanejo atende aos critérios de pesquisa selecionados.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhum remanejo atende aos critérios selecionados.</td></tr>`;
                 return;
             }
-
-            // Sort report entries chronologically descending
-            const sorted = [...filtered].sort((a,b) => new Date(b.data) - new Date(a.data));
-
-            sorted.forEach(r => {
+            [...filtered].sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(r => {
                 const formattedDate = r.data.split('-').reverse().join('/');
                 body.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
@@ -1587,61 +1142,44 @@
                         <td class="p-3 font-bold text-slate-800">${r.posto}</td>
                         <td class="p-3 text-red-600 font-semibold"><i class="fa-solid fa-user-minus text-[10px] mr-1"></i> ${r.saindo}</td>
                         <td class="p-3 text-emerald-700 font-semibold"><i class="fa-solid fa-user-plus text-[10px] mr-1"></i> ${r.entrando}</td>
-                        <td class="p-3">
-                            <span class="inline-flex px-2 py-0.5 rounded font-bold text-[10px] uppercase bg-slate-100 text-slate-700">
-                                ${r.motivo}
-                            </span>
-                        </td>
+                        <td class="p-3"><span class="inline-flex px-2 py-0.5 rounded font-bold text-[10px] uppercase bg-slate-100 text-slate-700">${r.motivo}</span></td>
                         <td class="p-3 text-slate-500 font-sans text-[11px]">${r.turno}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
-        // Format clean PDF action
-        function printFormattedReport() {
-            window.print();
-        }
+        function printFormattedReport() { window.print(); }
 
-        // SheetJS Dynamic Excel Generator Action
         function exportReportToExcel() {
             const reportRows = document.querySelectorAll('#report-table-body tr');
-            const dataToExport = [];
-
-            // Add standard table header structures
-            dataToExport.push(["DATA", "POSTO DE SERVICO", "CEDENTE (SAINDO)", "SUBSTITUTO (ENTRANDO)", "MOTIVO", "TURNO/ESCALA"]);
-
+            const dataToExport = [["DATA", "POSTO DE SERVICO", "CEDENTE (SAINDO)", "SUBSTITUTO (ENTRANDO)", "MOTIVO", "TURNO/ESCALA"]];
             reportRows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length < 6) return; // skip warning or empty rows
-
-                dataToExport.push([
-                    cells[0].innerText.trim(),
-                    cells[1].innerText.trim(),
-                    cells[2].innerText.trim(),
-                    cells[3].innerText.trim(),
-                    cells[4].innerText.trim(),
-                    cells[5].innerText.trim()
-                ]);
+                if (cells.length < 6) return;
+                dataToExport.push([cells[0].innerText.trim(), cells[1].innerText.trim(), cells[2].innerText.trim(), cells[3].innerText.trim(), cells[4].innerText.trim(), cells[5].innerText.trim()]);
             });
-
-            if (dataToExport.length <= 1) {
-                showToast("Não há dados na tabela de relatório para exportar.", "warning");
-                return;
-            }
-
+            if (dataToExport.length <= 1) { showToast("Não há dados para exportar.", "warning"); return; }
             const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(dataToExport);
-            XLSX.utils.book_append_sheet(wb, ws, "Remanejos Filtrados");
-            
-            // Trigger automatic download
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataToExport), "Remanejos Filtrados");
             XLSX.writeFile(wb, `Relatorio_Remanejos_Servnac_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showToast("Relatório baixado em Excel com sucesso!", "success");
+            showToast("Relatório baixado em Excel!", "success");
         }
 
-        /* ================================================================= */
-        /* APP CONNECTION / CONSOLE MODAL CONFIGS                            */
-        /* ================================================================= */
+        // ✅ NOVA FUNÇÃO: Exportar Postos de Serviço para Excel
+        function exportPostosToExcel() {
+            if (localDB.postos.length === 0) {
+                showToast("Nenhum posto cadastrado para exportar.", "warning");
+                return;
+            }
+            const dataToExport = [["ID", "NOME DO POSTO", "ENDEREÇO / CIDADE"]];
+            localDB.postos.forEach(p => {
+                dataToExport.push([p.id, p.nome, p.endereco]);
+            });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataToExport), "Postos de Serviço");
+            XLSX.writeFile(wb, `Postos_Servnac_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast("Postos exportados com sucesso!", "success");
+        }
 
         function openConfigModal() {
             document.getElementById('config-modal').classList.remove('hidden');
@@ -1649,36 +1187,28 @@
             document.getElementById('firebase-config-input').value = current;
         }
 
-        function closeConfigModal() {
-            document.getElementById('config-modal').classList.add('hidden');
-        }
+        function closeConfigModal() { document.getElementById('config-modal').classList.add('hidden'); }
 
         function saveFirebaseConfig() {
             const raw = document.getElementById('firebase-config-input').value.trim();
             try {
                 const parsed = JSON.parse(raw);
-                if (!parsed.apiKey) {
-                    throw new Error("Falta campo apiKey.");
-                }
+                if (!parsed.apiKey) throw new Error("Falta campo apiKey.");
                 localStorage.setItem("firebase_remanejos_config", JSON.stringify(parsed));
                 closeConfigModal();
-                showToast("Configuração salva! Reiniciando conexões...", "success");
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } catch (err) {
-                showToast("Formato JSON inválido ou incompleto.", "error");
-            }
+                showToast("Configuração salva! Reiniciando...", "success");
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (err) { showToast("Formato JSON inválido.", "error"); }
         }
 
         function resetFirebaseConfig() {
             localStorage.removeItem("firebase_remanejos_config");
             closeConfigModal();
-            showToast("Configurações limpas! Rodando em Modo Offline Local.", "warning");
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            showToast("Rodando em Modo Offline Local.", "warning");
+            setTimeout(() => window.location.reload(), 1000);
         }
     </script>
 </body>
 </html>
+HTMLEOF
+echo "Arquivo gerado com sucesso"
