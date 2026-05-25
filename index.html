@@ -698,7 +698,7 @@
                         if (user) {
                             const email = user.email || '';
                             const name = user.displayName || 'Operador Google';
-                            userRole = (email === "admin@servnac.com.br") ? 'admin' : 'operator';
+                            userRole = (email === "samuel.sobreira") ? 'admin' : 'operator';
                             enterApplication(name, email, userRole);
                             listenToFirestore();
                         } else {
@@ -733,7 +733,7 @@
             const errorMsg = document.getElementById('login-error-msg');
             errorBox.classList.add('hidden');
 
-            if (email === "admin@servnac.com.br" && password === "adminServnac2026") {
+            if (email === "admin@servnac.com.br" && password === "servnac.123") {
                 userRole = 'admin';
                 if (isFirebaseOnline) {
                     try { await firebase.auth().signInWithEmailAndPassword(email, password); } 
