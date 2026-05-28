@@ -699,7 +699,7 @@
                         if (user) {
                             const email = user.email || '';
                             const name = user.displayName || 'Operador Google';
-                            userRole = (email === "samuel.sobreira") ? 'admin' : 'operator';
+                            userRole = (email === "samuel.sobreira@gruposervnac.com.br") ? 'admin' : 'operator';
                             enterApplication(name, email, userRole);
                             listenToFirestore();
                         } else {
